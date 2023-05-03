@@ -1,0 +1,6 @@
+*.out
+logs
+slurm_out_files
+wandb
+viz_results
+__pycache__
