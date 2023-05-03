@@ -131,10 +131,12 @@ class ProteinDataset(torch.utils.data.Dataset):
 
 
 class SequenceDataset(torch.utils.data.Dataset):
-	def __init__(self, dataset_type, representation_type='surface_with_inout'):
+	def __init__(self, dataset_type, representation_type='surface_with_inout', big_dataset=False):
 		self.dataset_type = dataset_type
 		self.representation_type = representation_type
-		
+		self.big_dataset = big_dataset
+		if self.big_dataset:
+			self.representation_type = 'surface_trimesh_voxels'
 		if self.dataset_type == 'train':
 			with open('/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts/train_samples.txt', 'r') as f:
 				dir_list = f.readlines()
