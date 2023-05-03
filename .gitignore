@@ -4,3 +4,6 @@ slurm_out_files
 wandb
 viz_results
 __pycache__
+mainv2.py
+try.py
+trainv2.slurm
