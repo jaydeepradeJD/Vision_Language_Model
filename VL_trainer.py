@@ -128,8 +128,8 @@ class OnlySeqModel(pl.LightningModule):
 		super(OnlySeqModel, self).__init__()
 		self.decoder = OnlySeq_Decoder(cfg)
 		
-		# self.loss = torch.nn.BCELoss()
-		self.loss = torch.nn.L1Loss()
+		self.loss = torch.nn.BCELoss()
+		# self.loss = torch.nn.L1Loss()
 		# self.loss2 = torch.nn.MSELoss()
 		
 		
