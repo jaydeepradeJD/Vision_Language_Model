@@ -44,7 +44,7 @@ def main(cfg):
 	# 	utils.data_transforms.ToTensor(),
 	# 	])
 	# Dataset
-	if not cfg.DATASET.AUTOENCODER:
+	if not cfg.DATASET.AUTOENCODER and not cfg.TRAIN.ONLYSEQ:
 		train_dataset = ProteinDataset('train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE)
 		val_dataset = ProteinDataset('val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE)
 		# test_dataset = utils.data_loaders.ProteinDataset('test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE)
@@ -55,9 +55,9 @@ def main(cfg):
 		val_dataset = ProteinAutoEncoderDataset('val', val_transforms, background=cfg.DATASET.BACKGROUND)
 		# test_dataset = ProteinAutoEncoderDataset('test', test_transforms)
 	
-
-	# train_dataset = SequenceDataset('train', cfg.CONST.REP)
-	# val_dataset = SequenceDataset('val', cfg.CONST.REP)
+	if cfg.TRAIN.ONLYSEQ:
+		train_dataset = SequenceDataset('train', cfg.CONST.REP)
+		val_dataset = SequenceDataset('val', cfg.CONST.REP)
 	
 
 	# Set up Dataloader
@@ -81,14 +81,17 @@ def main(cfg):
 	if cfg.DATASET.AUTOENCODER:
 		model = AutoEncoder(cfg)
 
-	if not cfg.DATASET.AUTOENCODER:
+	if not cfg.DATASET.AUTOENCODER and not cfg.TRAIN.ONLYSEQ:
 		if cfg.DIR.AE_WEIGHTS is not None:
 			ae = AutoEncoder_old.load_from_checkpoint(cfg.DIR.AE_WEIGHTS, cfg=cfg)
 			ae.eval()
 			model = PretrainedAE_Model(cfg, pretrained_model=ae)
 		else:
 			model = Model(cfg)
-	# model = OnlySeqModel(cfg)
+	
+	if cfg.TRAIN.ONLYSEQ:
+		model = OnlySeqModel(cfg)
+
 	
 	# Initiate the trainer
 	logger = pl.loggers.TensorBoardLogger(cfg.DIR.OUT_PATH, name=cfg.DIR.EXPERIMENT_NAME)
@@ -163,6 +166,8 @@ if __name__ == '__main__':
 						help='Use Group Normalization')
 	parser.add_argument('-nodes','--num_nodes', default=None, type=int,
 						help='Number of nodes for training')
+	parser.add_argument('-OnlySeq', '--OnlySeq', action='store_true',
+						help='If training AutoEncoder')
 	
 	args = parser.parse_args()
 		
@@ -228,4 +233,6 @@ if __name__ == '__main__':
 		cfg.NETWORK.GROUP_NORM = True
 	if args.num_nodes is not None:
 		cfg.CONST.NODES = args.num_nodes
+	if args.OnlySeq:
+		cfg.TRAIN.ONLY_SEQ = True
 	main(cfg)

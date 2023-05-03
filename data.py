@@ -137,18 +137,24 @@ class SequenceDataset(torch.utils.data.Dataset):
 		self.big_dataset = big_dataset
 		if self.big_dataset:
 			self.representation_type = 'surface_trimesh_voxels'
+		if self.big_dataset:
+			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
+			self.seq_embd_path = '/work/mech-ai-scratch/jrrade/Protein/AF_swissprot_seq_embds'
+		else:
+			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts' 
+			self.seq_embd_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/PDBs_seq_emds'
 		if self.dataset_type == 'train':
-			with open('/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts/train_samples.txt', 'r') as f:
+			with open(os.path.join(self.metadata_path, 'train_samples.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
 		if self.dataset_type == 'val':
-			with open('/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts/val_samples.txt', 'r') as f:
+			with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
 		if self.dataset_type == 'test':
-			with open('/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts/test_samples.txt', 'r') as f:
+			with open(os.path.join(self.metadata_path, 'test_samples.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
@@ -167,7 +173,7 @@ class SequenceDataset(torch.utils.data.Dataset):
 			# Sequnece embeddings
 			folder_name =  self.dirs[idx].split('/')[-1]
 			seq_emd_filename = folder_name.split('.')[0] + '_esm2_t33.txt'
-			seq_emd_path = os.path.join('/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/PDBs_seq_emds', folder_name, seq_emd_filename)
+			seq_emd_path = os.path.join(self.seq_embd_path, folder_name, seq_emd_filename)
 			seq_emd = np.loadtxt(seq_emd_path, dtype=np.float32)
 			seq_emd = torch.from_numpy(seq_emd)
 			return seq_emd, volume

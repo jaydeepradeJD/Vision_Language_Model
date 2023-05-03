@@ -57,3 +57,4 @@ __C.TRAIN.L2_PENALTY                        = 0.0
 __C.TRAIN.OPTIM								= 'adam'
 __C.TRAIN.GPU								= 4
 __C.TRAIN.DEBUG								= False
+__C.TRAIN.ONLYSEQ                           = False
