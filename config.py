@@ -11,7 +11,7 @@ __C.DATASET                                = edict()
 __C.DATASET.GRAYSCALE                      = False
 __C.DATASET.AUTOENCODER                    = False
 __C.DATASET.BACKGROUND                     = False
-
+__C.DATASET.BIGDATA                        = False
 #
 # Common
 #

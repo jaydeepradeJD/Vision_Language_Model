@@ -5,14 +5,14 @@
 # job standard output will go to the file slurm-%j.out (where %j is the job ID)
 
 #SBATCH --time=24:00:00   # walltime limit (HH:MM:SS)
-#SBATCH --nodes=1   # number of nodes
-#SBATCH --ntasks-per-node=1  # 32 processor core(s) per node 
+#SBATCH --nodes=2   # number of nodes
+#SBATCH --ntasks-per-node=4  # 32 processor core(s) per node 
 #SBATCH --gres=gpu:a100:4
 #SBATCH --partition=priority-a100    # gpu node(s)
 #SBATCH -A baskargroup-a100gpu
 #SBATCH --no-requeue
 export CUDA_ENABLE_COREDUMP_ON_EXCEPTION=1
-export PL_TORCH_DISTRIBUTED_BACKEND=gloo
+#export PL_TORCH_DISTRIBUTED_BACKEND=gloo
 # LOAD MODULES, INSERT CODE, AND RUN YOUR PROGRAMS HERE
 
 module load miniconda3/4.10.3-svrr7oe
@@ -22,6 +22,12 @@ source activate DLRG_Lightning
 # python main.py -g 1 -ep 250 --name 'Only_SeqEmbeddings_lr_0.0003_less_params_v2_L1loss_l2_0.003'
 
 # python main.py -g 1 -ep 250 --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/tensorboard_logs/version_3/last.ckpt'
+
+
+python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --name 'BigData_Only_SeqEmbeddings_lr_0.001'
+
+#python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/BigData_Only_SeqEmbeddings_bs_256_lr_0.001/version_0/last.ckpt'
+
 
 
 ####### Vision-Language Model #######
@@ -68,7 +74,7 @@ source activate DLRG_Lightning
 
 # python main.py -g 4 --num_workers 1 -ep 250 --name VL_img_pretrainedAE_4x4x256_v2_lr_0.0001 --lr 0.0001 -bg --ae_weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/AE_WithBackground_bs128_ep100/version_7/epoch=72-step=901039.ckpt'
 
-python main.py -g 4 --num_workers 1 -ep 250 --name VL_img_pretrainedAE_4x4x256_v2_lr_0.0001 --lr 0.0001 -bg --ae_weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/AE_WithBackground_bs128_ep100/version_7/epoch=72-step=901039.ckpt' --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/VL_img_pretrainedAE_4x4x256_v2_lr_0.0001/version_5/last.ckpt'
+#python main.py -g 4 --num_workers 1 -ep 250 --name VL_img_pretrainedAE_4x4x256_v2_lr_0.0001 --lr 0.0001 -bg --ae_weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/AE_WithBackground_bs128_ep100/version_7/epoch=72-step=901039.ckpt' --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/VL_img_pretrainedAE_4x4x256_v2_lr_0.0001/version_5/last.ckpt'
 
 
 

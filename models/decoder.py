@@ -90,7 +90,7 @@ class OnlySeq_Decoder(torch.nn.Module):
 		super(OnlySeq_Decoder, self).__init__()
 		self.cfg = cfg
 		self.c_in = 20
-		self.c_out = 64 #128 
+		self.c_out = 128 #64 #128 
 		# Layer Definition
 						
 
@@ -101,7 +101,7 @@ class OnlySeq_Decoder(torch.nn.Module):
 		)
 		# 4x4x512
 
-		self.c_in = 64 #128
+		self.c_in = 128 #64 #128
 		self.c_out = 64 #32 #64
 		
 		self.layer2 = Conv3D_Up(self.c_in, self.c_out)
@@ -125,22 +125,22 @@ class OnlySeq_Decoder(torch.nn.Module):
 			torch.nn.Sigmoid()
 		)
 
-		# self.fc1 = torch.nn.Sequential(
-		# 	torch.nn.Linear(1280, 1280),
-		# 	torch.nn.ReLU()
-		# )
+		self.fc1 = torch.nn.Sequential(
+			torch.nn.Linear(1280, 1280),
+			torch.nn.ReLU()
+		)
 
-		# self.fc2 = torch.nn.Sequential(
-		# 	torch.nn.Linear(1280, 1280),
-		# 	torch.nn.ReLU()
-		# )
+		self.fc2 = torch.nn.Sequential(
+			torch.nn.Linear(1280, 1280),
+			torch.nn.ReLU()
+		)
 
 	def forward(self, x):
-		# x = x.view(-1, 1280)
-		# x = self.fc1(x)
-		# x = self.fc2(x)
+		x = x.view(-1, 1280)
+		x = self.fc1(x)
+		x = self.fc2(x)
 		
-		# x = x.view(-1, 20, 4, 4, 4)
+		x = x.view(-1, 20, 4, 4, 4)
 		
 		x = self.layer1(x)
 		x = self.layer2(x)

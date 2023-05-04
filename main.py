@@ -56,8 +56,8 @@ def main(cfg):
 		# test_dataset = ProteinAutoEncoderDataset('test', test_transforms)
 	
 	if cfg.TRAIN.ONLYSEQ:
-		train_dataset = SequenceDataset('train', cfg.CONST.REP)
-		val_dataset = SequenceDataset('val', cfg.CONST.REP)
+		train_dataset = SequenceDataset('train', cfg.CONST.REP, big_dataset=cfg.DATASET.BIGDATA)
+		val_dataset = SequenceDataset('val', cfg.CONST.REP, big_dataset=cfg.DATASET.BIGDATA)
 	
 
 	# Set up Dataloader
@@ -81,7 +81,7 @@ def main(cfg):
 	if cfg.DATASET.AUTOENCODER:
 		model = AutoEncoder(cfg)
 
-	if not cfg.DATASET.AUTOENCODER and not cfg.TRAIN.ONLYSEQ:
+	if (not cfg.DATASET.AUTOENCODER) and (not cfg.TRAIN.ONLYSEQ):
 		if cfg.DIR.AE_WEIGHTS is not None:
 			ae = AutoEncoder_old.load_from_checkpoint(cfg.DIR.AE_WEIGHTS, cfg=cfg)
 			ae.eval()
@@ -168,6 +168,8 @@ if __name__ == '__main__':
 						help='Number of nodes for training')
 	parser.add_argument('-OnlySeq', '--OnlySeq', action='store_true',
 						help='If training AutoEncoder')
+	parser.add_argument('-bigData', '--bigData', action='store_true',
+						help='Use Bige dataset of 543K samples')
 	
 	args = parser.parse_args()
 		
@@ -234,5 +236,7 @@ if __name__ == '__main__':
 	if args.num_nodes is not None:
 		cfg.CONST.NODES = args.num_nodes
 	if args.OnlySeq:
-		cfg.TRAIN.ONLY_SEQ = True
+		cfg.TRAIN.ONLYSEQ = True
+	if args.bigData:
+		cfg.DATASET.BIGDATA = True
 	main(cfg)
