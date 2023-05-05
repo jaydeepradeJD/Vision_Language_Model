@@ -25,9 +25,9 @@ source activate DLRG_Lightning
 # python main.py -g 1 -ep 250 --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/tensorboard_logs/version_3/last.ckpt'
 
 
-python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --name 'BigData_Only_SeqEmbeddings_lr_0.001'
+#srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --name 'BigData_Only_SeqEmbeddings_lr_0.001'
 
-#python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/BigData_Only_SeqEmbeddings_bs_256_lr_0.001/version_0/last.ckpt'
+srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --name 'BigData_Only_SeqEmbeddings_lr_0.001' --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/'BigData_Only_SeqEmbeddings_lr_0.001'/version_0/last.ckpt'
 
 
 
