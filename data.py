@@ -165,7 +165,7 @@ class SequenceDataset(torch.utils.data.Dataset):
 		if not (self.dataset_type == 'test'):
 
 			filepath = os.path.join(str(self.dirs[idx]), str(self.representation_type))
-			volume = np.load(os.path.join(filepath, '32.npz'))['arr_0']
+			volume = np.load(os.path.join(filepath, '32.npz'), allow_pickle=True)['arr_0']
 			# volume = np.load(os.path.join(filepath, '128.npz'))['arr_0']
 		
 			volume = volume.astype(np.float32)
