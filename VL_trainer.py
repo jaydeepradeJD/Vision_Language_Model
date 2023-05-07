@@ -127,7 +127,7 @@ class OnlySeqModel(pl.LightningModule):
 	def __init__(self, cfg):
 		super(OnlySeqModel, self).__init__()
 		self.decoder = OnlySeq_Decoder(cfg)
-		
+		self.cfg = cfg
 		self.loss = torch.nn.BCELoss()
 		# self.loss = torch.nn.L1Loss()
 		# self.loss2 = torch.nn.MSELoss()
