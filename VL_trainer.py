@@ -160,9 +160,10 @@ class OnlySeqModel(pl.LightningModule):
 		return loss
 	
 	def configure_optimizers(self):                         
-		lr = 0.001 #0.0003
-		opt = torch.optim.Adam(list(self.decoder.parameters()), lr)
-		# opt = torch.optim.Adam(list(self.decoder.parameters()), lr, weight_decay=0.001)
+		lr = self.cfg.TRAIN.LEARNING_RATE #0.001 #0.0003
+		weight_decay = self.cfg.TRAIN.L2_PENALTY
+		# opt = torch.optim.Adam(list(self.decoder.parameters()), lr)
+		opt = torch.optim.Adam(list(self.decoder.parameters()), lr, weight_decay=weight_decay)
 			  
 		return opt
 
