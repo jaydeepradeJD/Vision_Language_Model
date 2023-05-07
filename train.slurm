@@ -28,9 +28,9 @@ source activate DLRG_Lightning
 
 #srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --name 'BigData_Only_SeqEmbeddings_lr_0.001' --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/'BigData_Only_SeqEmbeddings_lr_0.001'/version_0/last.ckpt'
 
-srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --l2_penalty 0.001 --name 'BigData_Only_SeqEmbeddings_lr_0.001_l2_0.001'
+#srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --l2_penalty 0.001 --name 'BigData_Only_SeqEmbeddings_lr_0.001_l2_0.001'
 
-#srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --l2_penalty 0.001 --name 'BigData_Only_SeqEmbeddings_lr_0.001_l2_0.001' --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/'BigData_Only_SeqEmbeddings_lr_0.001_l2_0.001'/version_0/last.ckpt'
+srun python main.py -nodes 2 -g 4 --num_workers 4 -b 32 -ep 250 -OnlySeq --bigData --l2_penalty 0.001 --name 'BigData_Only_SeqEmbeddings_lr_0.001_l2_0.001' --weights '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/'BigData_Only_SeqEmbeddings_lr_0.001_l2_0.001'/version_0/last.ckpt'
 
 
 ####### Vision-Language Model #######
