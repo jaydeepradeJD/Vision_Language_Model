@@ -7,3 +7,4 @@ __pycache__
 mainv2.py
 trainv2.slurm
 try.py
+*.slurm
