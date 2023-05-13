@@ -170,6 +170,8 @@ if __name__ == '__main__':
 						help='If training AutoEncoder')
 	parser.add_argument('-bigData', '--bigData', action='store_true',
 						help='Use Bige dataset of 543K samples')
+	parser.add_argument('--dropout', dest='dropout',
+						help='Dropout rate', default=None, type=float)
 	
 	args = parser.parse_args()
 		
@@ -239,4 +241,6 @@ if __name__ == '__main__':
 		cfg.TRAIN.ONLYSEQ = True
 	if args.bigData:
 		cfg.DATASET.BIGDATA = True
+	if args.dropout is not None:
+		cfg.NETWORK.DROPOUT = args.dropout
 	main(cfg)

@@ -40,6 +40,7 @@ __C.NETWORK                                 = edict()
 __C.NETWORK.AFM_ENCODER                     = False
 __C.NETWORK.LATENT_DIM						= 4096
 __C.NETWORK.GROUP_NORM                      = None
+__C.NETWORK.DROPOUT                         = None
 #
 # Training
 #

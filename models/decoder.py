@@ -109,27 +109,28 @@ class OnlySeq_Decoder(torch.nn.Module):
 		self.layer1 = torch.nn.Sequential(
 			torch.nn.Conv3d(self.c_in, self.c_out, kernel_size=3, stride=1, padding=1),
 			torch.nn.BatchNorm3d(self.c_out),
-			torch.nn.ReLU(),
-			torch.nn.Dropout3d(0.25),
+			torch.nn.ReLU()
 		)
+		if cfg.NETWORK.DROPOUT is not None:
+			self.layer1.append(torch.nn.Dropout3d(cfg.NETWORK.DROPOUT))
 		# 4x4x512
 
 		self.c_in = 128 #64 #128
 		self.c_out = 64 #32 #64
 		
-		self.layer2 = Conv3D_Up(self.c_in, self.c_out, dropout=0.25)
+		self.layer2 = Conv3D_Up(self.c_in, self.c_out, dropout=cfg.NETWORK.DROPOUT)
 		# 8x8x8x64
 
 		self.c_in = self.c_out
 		self.c_out //= 2
 		
-		self.layer3 = Conv3D_Up(self.c_in, self.c_out, dropout=0.25)
+		self.layer3 = Conv3D_Up(self.c_in, self.c_out, dropout=cfg.NETWORK.DROPOUT)
 		# 16x16x16x32
 		
 		self.c_in = self.c_out
 		self.c_out //= 2
 		
-		self.layer4 = Conv3D_Up(self.c_in, self.c_out, dropout=0.25)
+		self.layer4 = Conv3D_Up(self.c_in, self.c_out, dropout=cfg.NETWORK.DROPOUT)
 		# 32x32x32x16
 
 
@@ -141,17 +142,19 @@ class OnlySeq_Decoder(torch.nn.Module):
 		self.fc1 = torch.nn.Sequential(
 			torch.nn.Linear(1280, 1280),
 			torch.nn.BatchNorm1d(1280),
-			torch.nn.ReLU(),
-			torch.nn.Dropout(p=0.25)
+			torch.nn.ReLU()
 		)
+		if cfg.NETWORK.DROPOUT is not None:
+			self.fc1.append(torch.nn.Dropout(cfg.NETWORK.DROPOUT))
 
 		self.fc2 = torch.nn.Sequential(
 			torch.nn.Linear(1280, 1280),
 			torch.nn.BatchNorm1d(1280),
-			torch.nn.ReLU(),
-			torch.nn.Dropout(p=0.25)
+			torch.nn.ReLU()
 		)
 
+		if cfg.NETWORK.DROPOUT is not None:
+			self.fc2.append(torch.nn.Dropout(cfg.NETWORK.DROPOUT))
 		
 	def forward(self, x):
 		x = x.view(-1, 1280)
