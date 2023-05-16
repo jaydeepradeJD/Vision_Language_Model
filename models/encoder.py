@@ -130,9 +130,9 @@ class Encoder(torch.nn.Module):
 			self.layer6 = Conv2D(self.c_in, 32, kernel_size=3, padding=1, stride=2)
 			# 4 x 4 x 32
 
-		# self.final_layer = Conv2D(256, 32, kernel_size=3, padding=1, stride=1)
+		self.final_layer = Conv2D(256, 32, kernel_size=3, padding=1, stride=1)
 		# 4x4x32
-		self.final_layer = Conv2D(256, 64, kernel_size=3, padding=1, stride=1)
+		#self.final_layer = Conv2D(256, 64, kernel_size=3, padding=1, stride=1)
 		# 4x4x64
 
 

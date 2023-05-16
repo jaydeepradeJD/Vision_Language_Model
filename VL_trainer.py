@@ -24,7 +24,7 @@ class Model(pl.LightningModule):
 		
 	def forward(self, imgs, seq_emd):
 		img_features = self.encoder(imgs)
-		# batch_size,320,4,4,4 or batch_size,160,4,4,4
+		# batch_size,320(64x5),4,4  or batch_size,160(32*5),4,4
 		emd_features = self.mlp(seq_emd)
 		# batch_size,1280
 		emd_features = emd_features.view(-1, 80, 4, 4)
@@ -52,9 +52,11 @@ class Model(pl.LightningModule):
 	
 	def configure_optimizers(self):                         
 		lr = self.cfg.TRAIN.LEARNING_RATE
+		weight_decay = self.cfg.TRAIN.L2_PENALTY
+		
 		opt = torch.optim.Adam(list(self.encoder.parameters())+
 			list(self.decoder.parameters())+
-			list(self.mlp.parameters()), lr)
+			list(self.mlp.parameters()), lr, weight_decay=weight_decay)
 			  
 		return opt
 
