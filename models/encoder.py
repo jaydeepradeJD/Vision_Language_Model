@@ -31,6 +31,8 @@ class Conv2D(torch.nn.Module):
 	def forward(self, x):
 		return self.layers(x)
 
+# Add resnet encoder modules as well as use dictionary for encoding dimension choices to make code more readable
+
 class Encoder(torch.nn.Module):
 	def __init__(self, cfg):
 		super(Encoder, self).__init__()
