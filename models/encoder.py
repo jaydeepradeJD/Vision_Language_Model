@@ -7,6 +7,9 @@ class Conv2D_Down(torch.nn.Module):
 					  torch.nn.Conv2d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
 					  torch.nn.BatchNorm2d(c_out),
 					  torch.nn.ReLU(),
+					  torch.nn.Conv2d(c_out, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
+					  torch.nn.BatchNorm2d(c_out),
+					  torch.nn.ReLU(),
 					  torch.nn.MaxPool2d(kernel_size=2)
 					  )
 
@@ -19,7 +22,11 @@ class Conv2D(torch.nn.Module):
 		self.layers = torch.nn.Sequential(
 					  torch.nn.Conv2d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
 					  torch.nn.BatchNorm2d(c_out),
-					  torch.nn.ReLU())
+					  torch.nn.ReLU(),
+					  torch.nn.Conv2d(c_out, c_out, kernel_size=3, padding=1, stride=1),
+					  torch.nn.BatchNorm2d(c_out),
+					  torch.nn.ReLU(),					  
+					  )
 
 	def forward(self, x):
 		return self.layers(x)
@@ -33,51 +40,15 @@ class Encoder(torch.nn.Module):
 		else:
 			self.c_in = 3
 
-		if self.cfg.CONST.IMG_W == self.cfg.CONST.IMG_H == 1080:		
-			self.c_out = 16 
-			self.layer11 = torch.nn.Sequential(torch.nn.Conv2d(self.c_in, self.c_out, kernel_size=11, padding=0, stride=4),
-						  torch.nn.BatchNorm2d(self.c_out),
-						  torch.nn.ReLU())
-			# 268 x 268 x 16		
-
-			self.c_in = self.c_out
-			self.c_out = self.c_out * 2
-
-			self.layer1 = Conv2D_Down(self.c_in, self.c_out, 7, 1, 1)
-			# 132 x 132 x 32
-
-			self.c_in = self.c_out
-			self.c_out = self.c_out * 2
-
-			self.layer2 = Conv2D_Down(self.c_in, self.c_out, 3, 1, 1)
-			# 66 x 66 x 64
-			
-			self.c_in = self.c_out
-			self.c_out = self.c_out * 2
-
-			self.layer3 = Conv2D_Down(self.c_in, self.c_out, 3, 0, 1)
-			# 32 x 32 x 128
-			
-			self.c_in = self.c_out
-			self.c_out = self.c_out * 2
-
-			self.layer4 = Conv2D_Down(self.c_in, self.c_out, 3, 1, 1)
-			 # 16 x 16 x 256
-
-			self.c_in = self.c_out
-			self.c_out = self.c_out * 2
-
-			self.layer5 = Conv2D_Down(self.c_in, self.c_out, 3, 0, 1)
-			 # 7 x 7 x 512
-
-
-
-
 		if self.cfg.CONST.IMG_W == self.cfg.CONST.IMG_H == 224:		
 			self.c_out = 32 #4 #8 
 			self.layer1 = torch.nn.Sequential(torch.nn.Conv2d(self.c_in, self.c_out, kernel_size=5, padding=2, stride=2),
 						  torch.nn.BatchNorm2d(self.c_out),
-						  torch.nn.ReLU())
+						  torch.nn.ReLU(),
+						  torch.nn.Conv2d(self.c_out, self.c_out, kernel_size=3, padding=1, stride=1),
+					  	  torch.nn.BatchNorm2d(self.c_out),
+					      torch.nn.ReLU(),
+					      )
 
 			self.c_in = self.c_out
 			self.c_out = self.c_out * 2
@@ -130,9 +101,9 @@ class Encoder(torch.nn.Module):
 			self.layer6 = Conv2D(self.c_in, 32, kernel_size=3, padding=1, stride=2)
 			# 4 x 4 x 32
 
-		self.final_layer = Conv2D(256, 32, kernel_size=3, padding=1, stride=1)
+		#self.final_layer = Conv2D(256, 32, kernel_size=3, padding=1, stride=1)
 		# 4x4x32
-		#self.final_layer = Conv2D(256, 64, kernel_size=3, padding=1, stride=1)
+		self.final_layer = Conv2D(256, 64, kernel_size=3, padding=1, stride=1)
 		# 4x4x64
 
 
@@ -161,4 +132,47 @@ class Encoder(torch.nn.Module):
 		# batch_size x 160 (32x5) x 4 x 4 
 		# print(image_features.size())  # torch.Size([batch_size, n_views, 256, 7, 7]) / torch.Size([batch_size, n_views, 512, 4, 4]) / torch.Size([batch_size, n_views, 256, 4, 4])
 		return image_features
- 
+
+
+# Encoder for input size 1080x1080
+
+'''
+		if self.cfg.CONST.IMG_W == self.cfg.CONST.IMG_H == 1080:		
+			self.c_out = 16 
+			self.layer11 = torch.nn.Sequential(torch.nn.Conv2d(self.c_in, self.c_out, kernel_size=11, padding=0, stride=4),
+						  torch.nn.BatchNorm2d(self.c_out),
+						  torch.nn.ReLU())
+			# 268 x 268 x 16		
+
+			self.c_in = self.c_out
+			self.c_out = self.c_out * 2
+
+			self.layer1 = Conv2D_Down(self.c_in, self.c_out, 7, 1, 1)
+			# 132 x 132 x 32
+
+			self.c_in = self.c_out
+			self.c_out = self.c_out * 2
+
+			self.layer2 = Conv2D_Down(self.c_in, self.c_out, 3, 1, 1)
+			# 66 x 66 x 64
+			
+			self.c_in = self.c_out
+			self.c_out = self.c_out * 2
+
+			self.layer3 = Conv2D_Down(self.c_in, self.c_out, 3, 0, 1)
+			# 32 x 32 x 128
+			
+			self.c_in = self.c_out
+			self.c_out = self.c_out * 2
+
+			self.layer4 = Conv2D_Down(self.c_in, self.c_out, 3, 1, 1)
+			 # 16 x 16 x 256
+
+			self.c_in = self.c_out
+			self.c_out = self.c_out * 2
+
+			self.layer5 = Conv2D_Down(self.c_in, self.c_out, 3, 0, 1) # Might need to check the dimensions here when input is 1080 x 1080
+			 # 7 x 7 x 512
+
+
+'''

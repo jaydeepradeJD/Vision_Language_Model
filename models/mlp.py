@@ -7,6 +7,7 @@ class MLP(torch.nn.Module):
 
 		self.mlp = torch.nn.Sequential(
 			torch.nn.Linear(1280, 1280),
+			torch.nn.BatchNorm1d(1280),
 			torch.nn.ReLU()
 		)
 

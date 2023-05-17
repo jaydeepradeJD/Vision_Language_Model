@@ -1,51 +1,51 @@
 import torch
 
-# class Conv3D_Up(torch.nn.Module):
-# 	def __init__(self, c_in, c_out, kernel_size=4, padding=1, stride=2, dropout=None):
-# 		super(Conv3D_Up, self).__init__()
-# 		if dropout is None:	
-# 			self.layers = torch.nn.Sequential(
-# 						torch.nn.ConvTranspose3d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
-# 						torch.nn.BatchNorm3d(c_out),
-# 						torch.nn.ReLU(),
-# 						torch.nn.Conv3d(c_out, c_out, kernel_size=3, padding=1, stride=1),
-# 						torch.nn.BatchNorm3d(c_out),
-# 						torch.nn.ReLU(),
-# 						)
-# 		else:
-# 			self.layers = torch.nn.Sequential(
-# 						torch.nn.ConvTranspose3d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
-# 						torch.nn.BatchNorm3d(c_out),
-# 						torch.nn.ReLU(),
-# 						torch.nn.Dropout3d(dropout),
-# 						torch.nn.Conv3d(c_out, c_out, kernel_size=3, padding=1, stride=1),
-# 						torch.nn.BatchNorm3d(c_out),
-# 						torch.nn.ReLU(),
-# 						torch.nn.Dropout3d(dropout),
-# 						)
-
-# 	def forward(self, x):
-# 		return self.layers(x)
-	
-	
 class Conv3D_Up(torch.nn.Module):
-	def __init__(self, c_in, c_out, kernel_size=4, padding=1, stride=2):
+	def __init__(self, c_in, c_out, kernel_size=4, padding=1, stride=2, dropout=None):
 		super(Conv3D_Up, self).__init__()
-		self.layers = torch.nn.Sequential(
-					  torch.nn.ConvTranspose3d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
-					  torch.nn.BatchNorm3d(c_out),
-					  torch.nn.ReLU(),
-					  )
+		if dropout is None:	
+			self.layers = torch.nn.Sequential(
+						torch.nn.ConvTranspose3d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
+						torch.nn.BatchNorm3d(c_out),
+						torch.nn.ReLU(),
+						torch.nn.Conv3d(c_out, c_out, kernel_size=3, padding=1, stride=1),
+						torch.nn.BatchNorm3d(c_out),
+						torch.nn.ReLU(),
+						)
+		else:
+			self.layers = torch.nn.Sequential(
+						torch.nn.ConvTranspose3d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
+						torch.nn.BatchNorm3d(c_out),
+						torch.nn.ReLU(),
+						torch.nn.Dropout3d(dropout),
+						torch.nn.Conv3d(c_out, c_out, kernel_size=3, padding=1, stride=1),
+						torch.nn.BatchNorm3d(c_out),
+						torch.nn.ReLU(),
+						torch.nn.Dropout3d(dropout),
+						)
 
 	def forward(self, x):
 		return self.layers(x)
+	
+	
+# class Conv3D_Up(torch.nn.Module):
+# 	def __init__(self, c_in, c_out, kernel_size=4, padding=1, stride=2):
+# 		super(Conv3D_Up, self).__init__()
+# 		self.layers = torch.nn.Sequential(
+# 					  torch.nn.ConvTranspose3d(c_in, c_out, kernel_size=kernel_size, padding=padding, stride=stride),
+# 					  torch.nn.BatchNorm3d(c_out),
+# 					  torch.nn.ReLU(),
+# 					  )
+
+# 	def forward(self, x):
+# 		return self.layers(x)
 
 
 class Decoder(torch.nn.Module):
 	def __init__(self, cfg):
 		super(Decoder, self).__init__()
 		self.cfg = cfg
-		self.c_in = 240 #1360 #400 #240
+		self.c_in = 400 #240 #1360 #240
 		self.c_out = 512 
 		# Layer Definition
 						
@@ -57,9 +57,8 @@ class Decoder(torch.nn.Module):
 			torch.nn.Conv2d(self.c_out, self.c_out, kernel_size=3, stride=1, padding=1),
 			torch.nn.BatchNorm2d(self.c_out),
 			torch.nn.ReLU(),
-			
-		)
-		# 4x4x512
+			)
+		    # 4x4x512
 
 		self.c_in = 128
 		self.c_out = 64
