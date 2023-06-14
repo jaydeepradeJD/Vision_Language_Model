@@ -135,7 +135,7 @@ class OnlySeq_Decoder(nn.Module):
 		super(OnlySeq_Decoder, self).__init__()
 		self.cfg = cfg
 		self.c_in = 20
-		self.c_out = 128 #64 #128 
+		self.c_out = 256 #128 #64 #128 
 		# Layer Definition
 
 		self.layer1 = nn.Sequential(
