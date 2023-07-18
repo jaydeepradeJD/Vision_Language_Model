@@ -138,9 +138,9 @@ class OnlySeqModel(pl.LightningModule):
 	def forward(self, seq_emd):
 		
 		# batch_size,1280
-		emd_features = seq_emd.view(-1, 20, 4, 4, 4)
+		# emd_features = seq_emd.view(-1, 20, 4, 4, 4)
 		
-		predicted = self.decoder(emd_features)
+		predicted = self.decoder(seq_emd)
 
 		return predicted
 

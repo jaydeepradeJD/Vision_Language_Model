@@ -41,6 +41,9 @@ __C.NETWORK.AFM_ENCODER                     = False
 __C.NETWORK.LATENT_DIM						= 4096
 __C.NETWORK.GROUP_NORM                      = None
 __C.NETWORK.DROPOUT                         = None
+__C.NETWORK.TRANSFORMER                     = False
+__C.NETWORK.TRANSFORMER_NUM_BLOCKS          = 1
+__C.NETWORK.TRANSFORMER_NUM_HEADS           = 8
 #
 # Training
 #

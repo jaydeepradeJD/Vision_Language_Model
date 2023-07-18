@@ -1,5 +1,7 @@
 import torch
 from torch import nn
+from .attention import TransformerBlock
+
 class Conv3D_Up(nn.Module):
 	def __init__(self, c_in, c_out, kernel_size=4, padding=1, stride=2, dropout=None):
 		super(Conv3D_Up, self).__init__()
@@ -165,28 +167,40 @@ class OnlySeq_Decoder(nn.Module):
 			nn.Conv3d(self.c_out, 1, kernel_size=3, stride=1, padding=1),
 			nn.Sigmoid()
 		)
+		if cfg.NETWORK.TRANSFORMER:
+			self.transformer_blocks = nn.ModuleList([])
+			for _ in range(cfg.NETWORK.TRANSFORMER_NUM_BLOCKS):
+				self.transformer_blocks.append(TransformerBlock(128 , cfg.NETWORK.TRANSFORMER_NUM_HEADS)) # (embd_dim, n_head)
+				
+		else:	
+			self.fc1 = nn.Sequential(
+				nn.Linear(1280, 1280),
+				nn.BatchNorm1d(1280),
+				nn.ReLU()
+			)
+			if cfg.NETWORK.DROPOUT is not None:
+				self.fc1.append(nn.Dropout(cfg.NETWORK.DROPOUT))
 
-		self.fc1 = nn.Sequential(
-			nn.Linear(1280, 1280),
-			nn.BatchNorm1d(1280),
-			nn.ReLU()
-		)
-		if cfg.NETWORK.DROPOUT is not None:
-			self.fc1.append(nn.Dropout(cfg.NETWORK.DROPOUT))
+			self.fc2 = nn.Sequential(
+				nn.Linear(1280, 1280),
+				nn.BatchNorm1d(1280),
+				nn.ReLU()
+			)
 
-		self.fc2 = nn.Sequential(
-			nn.Linear(1280, 1280),
-			nn.BatchNorm1d(1280),
-			nn.ReLU()
-		)
-
-		if cfg.NETWORK.DROPOUT is not None:
-			self.fc2.append(nn.Dropout(cfg.NETWORK.DROPOUT))
+			if cfg.NETWORK.DROPOUT is not None:
+				self.fc2.append(nn.Dropout(cfg.NETWORK.DROPOUT))
 		
 	def forward(self, x):
-		x = x.view(-1, 1280)
-		x = self.fc1(x)
-		x = self.fc2(x)
+		# x: (batch_size, 1280)
+		if self.cfg.NETWORK.TRANSFORMER:
+			# x = x.view(-1, 1280, 1)
+			x = x.view(-1, 10, 128)
+			for transformer in self.transformer_blocks:
+				x = transformer(x)
+		else:
+			x = x.view(-1, 1280)
+			x = self.fc1(x)
+			x = self.fc2(x)
 		
 		x = x.view(-1, 20, 4, 4, 4)
 		x = self.layer1(x)

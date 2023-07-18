@@ -172,6 +172,13 @@ if __name__ == '__main__':
 						help='Use Bige dataset of 543K samples')
 	parser.add_argument('--dropout', dest='dropout',
 						help='Dropout rate', default=None, type=float)
+	parser.add_argument('-transformer', '--transformer', action='store_true',
+						help='Use transformer and specify number of transformer blocks')
+	parser.add_argument('--num_blocks', dest='num_blocks',
+						help='Number Transformer blocks', default=None, type=int)
+	parser.add_argument('--num_heads', dest='num_heads',
+						help='Number of heads in multi-head attention', default=1, type=int)
+	
 	
 	args = parser.parse_args()
 		
@@ -243,4 +250,9 @@ if __name__ == '__main__':
 		cfg.DATASET.BIGDATA = True
 	if args.dropout is not None:
 		cfg.NETWORK.DROPOUT = args.dropout
+	
+	if args.transformer:
+		cfg.NETWORK.TRANSFORMER = True
+		cfg.NETWORK.TRANSFORMER_NUM_BLOCKS = args.num_blocks
+		cfg.NETWORK.TRANSFORMER_NUM_HEADS = args.num_heads
 	main(cfg)
