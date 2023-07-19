@@ -194,7 +194,7 @@ class OnlySeq_Decoder(nn.Module):
 		# x: (batch_size, 1280)
 		if self.cfg.NETWORK.TRANSFORMER:
 			# x = x.view(-1, 1280, 1)
-			x = x.view(-1, 10, 128)
+			x = x.view(-1, 10, 128) #(batch_zize, seq_len, emb_dim)
 			for transformer in self.transformer_blocks:
 				x = transformer(x)
 		else:
