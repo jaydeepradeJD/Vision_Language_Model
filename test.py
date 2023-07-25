@@ -24,7 +24,6 @@ def test(model, train_data_loader, val_data_loader, weight_path=None, save_dir=N
 
 	# model = Model.load_from_checkpoint('/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/Vision_Language_Model/logs/tensorboard_logs/version_4/last.ckpt',
 	# 									cfg=cfg)
-
 	# model = OnlySeqModel.load_from_checkpoint(weight_path,
 	# 									cfg=cfg)
 	model = model.load_from_checkpoint(weight_path,
