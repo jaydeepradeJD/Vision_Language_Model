@@ -62,7 +62,7 @@ def main(cfg):
 		val_dataset = SequenceDataset('val', cfg.CONST.REP, big_dataset=cfg.DATASET.BIGDATA)
 	
 	if cfg.TEST.IS_TEST:
-		indices = np.arange(10) #random.sample(range(len(train_dataset)), cfg.CONST.BATCH_SIZE*10)
+		indices = np.arange(cfg.TEST.NUM_SAMPLES) #random.sample(range(len(train_dataset)), cfg.CONST.BATCH_SIZE*10)
 		train_dataset = torch.utils.data.Subset(train_dataset, indices)
 		val_dataset = torch.utils.data.Subset(val_dataset, indices)
 
