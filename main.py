@@ -1,5 +1,6 @@
 import os
 import argparse
+import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
@@ -10,6 +11,7 @@ from data import ProteinDataset, SequenceDataset, ProteinAutoEncoderDataset
 from VL_trainer import Model, OnlySeqModel, AutoEncoder, PretrainedAE_Model, AutoEncoder_old
 from config import cfg
 import utils.data_transforms
+from test import test
 
 def main(cfg):
 	if not os.path.exists(cfg.DIR.OUT_PATH):
@@ -59,6 +61,10 @@ def main(cfg):
 		train_dataset = SequenceDataset('train', cfg.CONST.REP, big_dataset=cfg.DATASET.BIGDATA)
 		val_dataset = SequenceDataset('val', cfg.CONST.REP, big_dataset=cfg.DATASET.BIGDATA)
 	
+	if cfg.TEST.IS_TEST:
+		indices = np.arange(10) #random.sample(range(len(train_dataset)), cfg.CONST.BATCH_SIZE*10)
+		train_dataset = torch.utils.data.Subset(train_dataset, indices)
+		val_dataset = torch.utils.data.Subset(val_dataset, indices)
 
 	# Set up Dataloader
 	train_data_loader = torch.utils.data.DataLoader(dataset=train_dataset,
@@ -92,33 +98,35 @@ def main(cfg):
 	if cfg.TRAIN.ONLYSEQ:
 		model = OnlySeqModel(cfg)
 
-	
-	# Initiate the trainer
-	logger = pl.loggers.TensorBoardLogger(cfg.DIR.OUT_PATH, name=cfg.DIR.EXPERIMENT_NAME)
+	if not cfg.TEST.IS_TEST:		
+		# Initiate the trainer
+		logger = pl.loggers.TensorBoardLogger(cfg.DIR.OUT_PATH, name=cfg.DIR.EXPERIMENT_NAME)
 
-	wandb_logger = pl.loggers.WandbLogger(name=cfg.DIR.EXPERIMENT_NAME,
-										project=cfg.DIR.PROJECT_NAME, dir=cfg.DIR.OUT_PATH)
+		wandb_logger = pl.loggers.WandbLogger(name=cfg.DIR.EXPERIMENT_NAME,
+											project=cfg.DIR.PROJECT_NAME, dir=cfg.DIR.OUT_PATH)
 
-	checkpoint = ModelCheckpoint(monitor='val/loss',
-								 dirpath=logger.log_dir, 
-								 filename='{epoch}-{step}',
-								 mode='min', 
-								 save_last=True)
+		checkpoint = ModelCheckpoint(monitor='val/loss',
+									dirpath=logger.log_dir, 
+									filename='{epoch}-{step}',
+									mode='min', 
+									save_last=True)
 
-	trainer = pl.Trainer(devices=cfg.TRAIN.GPU, 
-		      			 num_nodes=cfg.CONST.NODES,
-						 accelerator='gpu', 
-						 strategy='ddp',
-						 callbacks=[checkpoint],
-						 logger=[logger, wandb_logger], 
-						 max_epochs=cfg.CONST.NUM_EPOCHS, 
-						 default_root_dir=cfg.DIR.OUT_PATH, 
-						 fast_dev_run=cfg.TRAIN.DEBUG)
+		trainer = pl.Trainer(devices=cfg.TRAIN.GPU, 
+							num_nodes=cfg.CONST.NODES,
+							accelerator='gpu', 
+							strategy='ddp',
+							callbacks=[checkpoint],
+							logger=[logger, wandb_logger], 
+							max_epochs=cfg.CONST.NUM_EPOCHS, 
+							default_root_dir=cfg.DIR.OUT_PATH, 
+							fast_dev_run=cfg.TRAIN.DEBUG)
 
-	# Training
-	
-	trainer.fit(model, train_data_loader, val_data_loader, ckpt_path=cfg.DIR.WEIGHTS)
+		# Training
+		
+		trainer.fit(model, train_data_loader, val_data_loader, ckpt_path=cfg.DIR.WEIGHTS)
 
+	if cfg.TEST.IS_TEST:
+		test(model, train_data_loader, val_data_loader, cfg.DIR.WEIGHTS, cfg.DIR.OUT_PATH)
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Vision Language Models')
 	parser.add_argument('--save_dir', default='./logs/',
@@ -178,6 +186,10 @@ if __name__ == '__main__':
 						help='Number Transformer blocks', default=None, type=int)
 	parser.add_argument('--num_heads', dest='num_heads',
 						help='Number of heads in multi-head attention', default=1, type=int)
+	parser.add_argument('--test', dest='test',
+						help='Perform Inferencing', action='store_true')
+	parser.add_argument('--num_test_samples', dest='num_test_samples',
+						help='Number of samples to perform test ons', default=1, type=int)
 	
 	
 	args = parser.parse_args()
@@ -255,4 +267,8 @@ if __name__ == '__main__':
 		cfg.NETWORK.TRANSFORMER = True
 		cfg.NETWORK.TRANSFORMER_NUM_BLOCKS = args.num_blocks
 		cfg.NETWORK.TRANSFORMER_NUM_HEADS = args.num_heads
+	
+	if args.test:
+		cfg.TEST.IS_TEST = True
+		cfg.TEST.NUM_SAMPLES = args.num_test_samples
 	main(cfg)

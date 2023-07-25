@@ -62,3 +62,10 @@ __C.TRAIN.OPTIM								= 'adam'
 __C.TRAIN.GPU								= 4
 __C.TRAIN.DEBUG								= False
 __C.TRAIN.ONLYSEQ                           = False
+
+#
+# TEST
+#
+__C.TEST                                    = edict()
+__C.TEST.IS_TEST                            = False
+__C.TEST.NUM_SAMPLES                        = 1
