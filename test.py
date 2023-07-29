@@ -50,7 +50,7 @@ def test(model, train_data_loader, val_data_loader, weight_path=None, save_dir=N
 		predicted = predicted.cpu().detach().squeeze().numpy()
 		target = target.cpu().detach().squeeze().numpy()
 		
-		visMC(target, predicted, idx, path=save_dir+'/train')
+		#visMC(target, predicted, idx, path=save_dir+'/train')
 
 	val_ious = []
 	for idx, sample in enumerate(val_data_loader):
@@ -73,7 +73,7 @@ def test(model, train_data_loader, val_data_loader, weight_path=None, save_dir=N
 		predicted = predicted.cpu().detach().squeeze().numpy()
 		target = target.cpu().detach().squeeze().numpy()
 		
-		visMC(target, predicted, idx, path=save_dir+'/val')
+		#visMC(target, predicted, idx, path=save_dir+'/val')
 
 	print('train_iou = ', np.mean(train_ious), '#'*5, 'val_iou = ', np.mean(val_ious))
 
