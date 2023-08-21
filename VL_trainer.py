@@ -7,7 +7,7 @@ from models.autoencoder import Decoder as AE_decoder
 
 from models.autoencoder_old import Encoder as AE_encoder_old
 from models.autoencoder_old import Decoder as AE_decoder_old
-
+from models.unet import UNet3D
 from models.mlp import MLP
 
 
@@ -129,36 +129,50 @@ class OnlySeqModel(pl.LightningModule):
 	def __init__(self, cfg):
 		super(OnlySeqModel, self).__init__()
 		self.decoder = OnlySeq_Decoder(cfg)
+		if cfg.NETWORK.DISCRIMINATOR:
+			self.disc = UNet3D(cfg)
 		self.cfg = cfg
 		self.loss = torch.nn.BCELoss()
 		# self.loss = torch.nn.L1Loss()
 		# self.loss2 = torch.nn.MSELoss()
 		
 		
-	def forward(self, seq_emd):
+	def forward(self, seq_emd, target):
 		
 		# batch_size,1280
 		# emd_features = seq_emd.view(-1, 20, 4, 4, 4)
 		
 		predicted = self.decoder(seq_emd)
-
-		return predicted
-
+		if self.cfg.NETWORK.DISCRIMINATOR:
+			reconstructed = self.disc(predicted)
+			loss1 = self.loss(predicted, target)
+			loss2 = self.loss(reconstructed, target)
+			total_loss = loss1 + loss2
+			return predicted, reconstructed, loss1, loss2, total_loss
+		else:
+			loss = self.loss(predicted, target)
+			return predicted, loss
+		
 	def training_step(self, batch, batch_idx):
 		seq_emd, target = batch 
 		
-		predicted = self.forward(seq_emd)
-		
-		loss = self.loss(predicted, target)
-		self.log_dict({'train/loss':loss})
+		if self.cfg.NETWORK.DISCRIMINATOR:
+			predicted, reconstructed, loss1, loss2, loss = self.forward(seq_emd, target)
+			self.log_dict({'train/loss1':loss1, 'train/loss2':loss2, 'train/total_loss':loss})
+		else:
+			predicted, loss = self.forward(seq_emd, target)
+			self.log_dict({'train/loss':loss})
 		return loss
 	
 	def validation_step(self, batch, batch_idx):
 		seq_emd, target = batch 
 		
-		predicted = self.forward(seq_emd)
-		loss = self.loss(predicted, target)
-		self.log_dict({'val/loss':loss})
+		if self.cfg.NETWORK.DISCRIMINATOR:
+			predicted, reconstructed, loss1, loss2, loss = self.forward(seq_emd, target)
+			self.log_dict({'val/loss1':loss1, 'val/loss2':loss2, 'val/total_loss':loss})
+		else:
+			predicted, loss = self.forward(seq_emd, target)
+			self.log_dict({'val/loss':loss})
 		return loss
 	
 	def configure_optimizers(self):                         

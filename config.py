@@ -44,6 +44,7 @@ __C.NETWORK.DROPOUT                         = None
 __C.NETWORK.TRANSFORMER                     = False
 __C.NETWORK.TRANSFORMER_NUM_BLOCKS          = 1
 __C.NETWORK.TRANSFORMER_NUM_HEADS           = 8
+__C.NETWORK.DISCRIMINATOR                   = False
 #
 # Training
 #

@@ -17,7 +17,10 @@ def main(cfg):
 	if not os.path.exists(cfg.DIR.OUT_PATH):
 		os.makedirs(cfg.DIR.OUT_PATH)
 		# Set up data augmentation
-	
+	print('#'*5)
+	print(cfg)
+	print('#'*5)
+
 	IMG_SIZE = cfg.CONST.IMG_H, cfg.CONST.IMG_W
 	
 	if not cfg.DATASET.AUTOENCODER:
@@ -190,6 +193,8 @@ if __name__ == '__main__':
 						help='Perform Inferencing', action='store_true')
 	parser.add_argument('--num_test_samples', dest='num_test_samples',
 						help='Number of samples to perform test ons', default=1, type=int)
+	parser.add_argument('--disc', dest='disc',
+						help='Use Discriminator', action='store_true')
 	
 	
 	args = parser.parse_args()
@@ -271,4 +276,7 @@ if __name__ == '__main__':
 	if args.test:
 		cfg.TEST.IS_TEST = True
 		cfg.TEST.NUM_SAMPLES = args.num_test_samples
+
+	if args.disc:
+		cfg.NETWORK.DISCRIMINATOR = True
 	main(cfg)
