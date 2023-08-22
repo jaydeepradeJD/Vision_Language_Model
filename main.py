@@ -108,7 +108,10 @@ def main(cfg):
 		wandb_logger = pl.loggers.WandbLogger(name=cfg.DIR.EXPERIMENT_NAME,
 											project=cfg.DIR.PROJECT_NAME, dir=cfg.DIR.OUT_PATH)
 
-		checkpoint = ModelCheckpoint(monitor='val/loss',
+		monitor_val = 'val/loss'
+		if cfg.NETWORK.DISCRIMINATOR:
+			monitor_val = 'val/total_loss'
+		checkpoint = ModelCheckpoint(monitor=monitor_val,
 									dirpath=logger.log_dir, 
 									filename='{epoch}-{step}',
 									mode='min', 
