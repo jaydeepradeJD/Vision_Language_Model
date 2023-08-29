@@ -6,6 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.plugins import DDPPlugin
 
 from data import ProteinDataset, SequenceDataset, ProteinAutoEncoderDataset
 from VL_trainer import Model, OnlySeqModel, AutoEncoder, PretrainedAE_Model, AutoEncoder_old
@@ -74,10 +75,12 @@ def main(cfg):
 													batch_size=cfg.CONST.BATCH_SIZE,
 													num_workers=cfg.CONST.NUM_WORKER,
 													shuffle=True,
+													pin_memory=True,
 													drop_last=True)
 	val_data_loader = torch.utils.data.DataLoader(dataset=val_dataset,
 												  batch_size=cfg.CONST.BATCH_SIZE,
 												  num_workers=cfg.CONST.NUM_WORKER,
+												  pin_memory=True,
 												  shuffle=False)
 	# if test_dataset is not None:
 	# 	test_data_loader = torch.utils.data.DataLoader(dataset=test_dataset,
@@ -121,6 +124,7 @@ def main(cfg):
 							num_nodes=cfg.CONST.NODES,
 							accelerator='gpu', 
 							strategy='ddp',
+							#plugins=DDPPlugin(find_unused_parameters=False),
 							callbacks=[checkpoint],
 							logger=[logger, wandb_logger], 
 							max_epochs=cfg.CONST.NUM_EPOCHS, 

@@ -1,6 +1,7 @@
 *.out
 logs
 logs_old
+logs_debug
 slurm_out_files
 wandb
 viz_results

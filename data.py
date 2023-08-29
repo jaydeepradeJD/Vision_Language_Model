@@ -30,7 +30,10 @@ class ProteinDataset(torch.utils.data.Dataset):
 			# with open(os.path.join(self.metadata_path, 'train_samples_bridges.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_50k.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_100k.txt'), 'r') as f:
-			with open(os.path.join(self.metadata_path, 'train_samples_150k.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'train_samples_150k.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'train_samples_256.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'train_samples_1k.txt'), 'r') as f:
+			with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
 				
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
@@ -39,8 +42,11 @@ class ProteinDataset(torch.utils.data.Dataset):
 			# with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'val_samples_bridges.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'val_samples_50k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'val_samples_100k.txt'), 'r') as f:
-			with open(os.path.join(self.metadata_path, 'val_samples_150k.txt'), 'r') as f:
+			# # with open(os.path.join(self.metadata_path, 'val_samples_100k.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'val_samples_150k.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'val_samples_256.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'train_samples_1k.txt'), 'r') as f:
+			with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
@@ -163,12 +169,14 @@ class SequenceDataset(torch.utils.data.Dataset):
 			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts' 
 			self.seq_embd_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/PDBs_seq_emds'
 		if self.dataset_type == 'train':
-			with open(os.path.join(self.metadata_path, 'train_samples.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'train_samples.txt'), 'r') as f:
+			with open(os.path.join(self.metadata_path, 'train_samples_256.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
 		if self.dataset_type == 'val':
-			with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
+			# with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
+			with open(os.path.join(self.metadata_path, 'val_samples_256.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
