@@ -6,7 +6,6 @@ from torch.utils.data import Dataset, DataLoader
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.plugins import DDPPlugin
 
 from data import ProteinDataset, SequenceDataset, ProteinAutoEncoderDataset
 from VL_trainer import Model, OnlySeqModel, AutoEncoder, PretrainedAE_Model, AutoEncoder_old
@@ -51,8 +50,8 @@ def main(cfg):
 	# 	])
 	# Dataset
 	if not cfg.DATASET.AUTOENCODER and not cfg.TRAIN.ONLYSEQ:
-		train_dataset = ProteinDataset('train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA)
-		val_dataset = ProteinDataset('val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA)
+		train_dataset = ProteinDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA)
+		val_dataset = ProteinDataset(cfg, 'val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA)
 		# test_dataset = utils.data_loaders.ProteinDataset('test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE)
 		# test_dataset = None
 
@@ -202,6 +201,8 @@ if __name__ == '__main__':
 						help='Number of samples to perform test ons', default=1, type=int)
 	parser.add_argument('--disc', dest='disc',
 						help='Use Discriminator', action='store_true')
+	parser.add_argument('--num_samples', dest='num_samples',
+						help='Numer of samples to use for training', default='10k', type=str)
 	
 	
 	args = parser.parse_args()
@@ -286,4 +287,7 @@ if __name__ == '__main__':
 
 	if args.disc:
 		cfg.NETWORK.DISCRIMINATOR = True
+	
+	if args.num_samples is not None:
+		cfg.DATASET.NUM_SAMPLES = args.num_samples
 	main(cfg)

@@ -7,7 +7,8 @@ import torch
 
 
 class ProteinDataset(torch.utils.data.Dataset):
-	def __init__(self, dataset_type, n_views_rendering, representation_type='surface_with_inout', transforms=None, grayscale=False, background=False, big_dataset=False):
+	def __init__(self, cfg, dataset_type, n_views_rendering, representation_type='surface_with_inout', transforms=None, grayscale=False, background=False, big_dataset=False):
+		self.cfg = cfg
 		self.dataset_type = dataset_type
 		self.n_views_rendering = n_views_rendering
 		self.representation_type = representation_type
@@ -15,6 +16,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 		self.grayscale = grayscale
 		self.background = background
 		self.big_dataset = big_dataset
+		
 		if self.big_dataset:
 			self.representation_type = 'surface_trimesh_voxels'
 			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
@@ -26,30 +28,37 @@ class ProteinDataset(torch.utils.data.Dataset):
 
 		
 		if self.dataset_type == 'train':
-			# with open(os.path.join(self.metadata_path, 'train_samples.txt'), 'r') as f:
+			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
+				train_samples_filename = os.path.join(self.metadata_path, 'train_samples.txt')
+			else:
+				train_samples_filename = os.path.join(self.metadata_path, 'train_samples_%s.txt'%self.cfg.DATASET.NUM_SAMPLES)
+			with open(train_samples_filename, 'r') as f:
+				dir_list = f.readlines()
+				self.dirs = [d.strip() for d in dir_list]
+				
 			# with open(os.path.join(self.metadata_path, 'train_samples_bridges.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_50k.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_100k.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_150k.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_256.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_1k.txt'), 'r') as f:
-			with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
-				
+			# with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
+		if self.dataset_type == 'val':
+			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
+				val_samples_filename = os.path.join(self.metadata_path, 'val_samples.txt')
+			else:
+				val_samples_filename = os.path.join(self.metadata_path, 'val_samples_%s.txt'%self.cfg.DATASET.NUM_SAMPLES)
+			with open(val_samples_filename, 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
-
-		if self.dataset_type == 'val':
-			# with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'val_samples_bridges.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'val_samples_50k.txt'), 'r') as f:
 			# # with open(os.path.join(self.metadata_path, 'val_samples_100k.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'val_samples_150k.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'val_samples_256.txt'), 'r') as f:
 			# with open(os.path.join(self.metadata_path, 'train_samples_1k.txt'), 'r') as f:
-			with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
-				dir_list = f.readlines()
-				self.dirs = [d.strip() for d in dir_list]
-
+			# with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
+			
 		if self.dataset_type == 'test':
 			with open(os.path.join(self.metadata_path, 'test_samples.txt'), 'r') as f:
 				dir_list = f.readlines()

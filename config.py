@@ -12,6 +12,7 @@ __C.DATASET.GRAYSCALE                      = False
 __C.DATASET.AUTOENCODER                    = False
 __C.DATASET.BACKGROUND                     = False
 __C.DATASET.BIGDATA                        = False
+__C.DATASET.NUM_SAMPLES                    = '10k'
 #
 # Common
 #
