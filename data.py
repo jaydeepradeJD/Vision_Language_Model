@@ -36,13 +36,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 				
-			# with open(os.path.join(self.metadata_path, 'train_samples_bridges.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_50k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_100k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_150k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_256.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_1k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
+		
 		if self.dataset_type == 'val':
 			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
 				val_samples_filename = os.path.join(self.metadata_path, 'val_samples.txt')
@@ -51,13 +45,6 @@ class ProteinDataset(torch.utils.data.Dataset):
 			with open(val_samples_filename, 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
-			# with open(os.path.join(self.metadata_path, 'val_samples_bridges.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'val_samples_50k.txt'), 'r') as f:
-			# # with open(os.path.join(self.metadata_path, 'val_samples_100k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'val_samples_150k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'val_samples_256.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_1k.txt'), 'r') as f:
-			# with open(os.path.join(self.metadata_path, 'train_samples_10k.txt'), 'r') as f:
 			
 		if self.dataset_type == 'test':
 			with open(os.path.join(self.metadata_path, 'test_samples.txt'), 'r') as f:
