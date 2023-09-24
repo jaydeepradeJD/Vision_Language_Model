@@ -10,3 +10,4 @@ mainv2.py
 trainv2.slurm
 try.py
 *.slurm
+log_archive

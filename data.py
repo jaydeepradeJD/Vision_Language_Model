@@ -4,6 +4,7 @@ import numpy as np
 import random
 import torch.utils.data.dataset
 import torch
+from transform_matrix import transform_matrix
 
 
 class ProteinDataset(torch.utils.data.Dataset):
@@ -252,3 +253,73 @@ class ProteinAutoEncoderDataset(torch.utils.data.Dataset):
 		return image
 
 		
+class ProteinTransformDataset(torch.utils.data.Dataset):
+	def __init__(self, cfg, dataset_type, n_views_rendering, representation_type='surface_trimesh_voxels', transforms=None, grayscale=False, background=False):
+		self.representation_type = representation_type
+		self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
+		self.cfg = cfg
+		self.dataset_type = dataset_type
+		self.n_views_rendering = n_views_rendering
+		self.transforms = transforms
+		self.grayscale = grayscale
+		self.background = background
+		self.transform_matrices = transform_matrix()
+
+
+		if self.dataset_type == 'train':
+			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
+				train_samples_filename = os.path.join(self.metadata_path, 'train_samples.txt')
+			else:
+				train_samples_filename = os.path.join(self.metadata_path, 'train_samples_%s.txt'%self.cfg.DATASET.NUM_SAMPLES)
+			with open(train_samples_filename, 'r') as f:
+				dir_list = f.readlines()
+				self.dirs = [d.strip() for d in dir_list]
+
+		if self.dataset_type == 'val':
+			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
+				val_samples_filename = os.path.join(self.metadata_path, 'val_samples.txt')
+			else:
+				val_samples_filename = os.path.join(self.metadata_path, 'val_samples_%s.txt'%self.cfg.DATASET.NUM_SAMPLES)
+			with open(val_samples_filename, 'r') as f:
+				dir_list = f.readlines()
+				self.dirs = [d.strip() for d in dir_list]
+
+		if self.dataset_type == 'test':
+			with open(os.path.join(self.metadata_path, 'test_samples.txt'), 'r') as f:
+				dir_list = f.readlines()
+				self.dirs = [d.strip() for d in dir_list]
+
+	def __len__(self):
+		return len(self.dirs)
+	
+	def __getitem__(self, idx):
+		if not (self.dataset_type == 'test'):
+			filepath = os.path.join(str(self.dirs[idx]), str(self.representation_type))
+			#double the views for pairing
+			views = random.sample(range(25), self.n_views_rendering * 2)
+
+			matrices = self.transform_matrices.get_transforms(views, filepath)
+			rendering_images = [[],[]]
+			output = [[[0] for x in range(1)] for y in range(2)]
+			
+			for i in range(2):
+				for v in views[i::2]:
+					if self.background:
+						filename = os.path.join(filepath, str(v) +'_with_bg.png')
+					else:
+						filename = os.path.join(filepath, str(v) +'.png')
+					if not self.grayscale:
+						rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+					if self.grayscale:
+						rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
+					rendering_images[i].append(rendering_image)
+
+				rendering_images[i] = np.asarray(rendering_images[i])
+				if self.grayscale:
+					rendering_images[i] = np.expand_dims(rendering_images[i], axis=-1) 
+			
+			return rendering_images, matrices
+
+
+			
+			
