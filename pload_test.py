@@ -98,5 +98,4 @@ if __name__ == '__main__':
 	if args.num_workers is not None:
 		cfg.CONST.NUM_WORKER  = args.num_workers
 
-
 	main(cfg)

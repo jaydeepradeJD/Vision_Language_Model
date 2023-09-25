@@ -300,7 +300,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 
 			matrices = self.transform_matrices.get_transforms(views, filepath)
 			rendering_images = [[],[]]
-			output = [[[0] for x in range(1)] for y in range(2)]
 			
 			for i in range(2):
 				for v in views[i::2]:

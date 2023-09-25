@@ -81,7 +81,6 @@ def main():
     views = random.sample(range(25), n_views_rendering * 2)
 
     print(transform.get_transforms(views, filepath))
-    
 
 if __name__ == '__main__':
     main()
