@@ -52,7 +52,7 @@ class transform_matrix():
 
         for idx in range(0, len(views) - 1, 2):
 
-            start_xytheta = float(metadata[idx+1]), metadata[idx+2], metadata[idx+3]
+            start_xytheta = metadata[idx+1], metadata[idx+2], metadata[idx+3]
             end_xytheta = metadata[idx+5], metadata[idx+6], metadata[idx+7]
 
             #get transform between two views
