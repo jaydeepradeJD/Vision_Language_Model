@@ -50,10 +50,10 @@ class transform_matrix():
             metadata = [m.strip() for m in metadata]
             metadata = [float(m) if self.is_float(m) else m for m in metadata]
 
-        for idx in range(len(views) - 1):
+        for idx in range(0, len(views) - 1, 2):
 
-            start_xytheta = float(metadata[idx*4+1]), metadata[idx*4+2], metadata[idx*4+3]
-            end_xytheta = metadata[idx*4+5], metadata[idx*4+6], metadata[idx*4+7]
+            start_xytheta = float(metadata[idx+1]), metadata[idx+2], metadata[idx+3]
+            end_xytheta = metadata[idx+5], metadata[idx+6], metadata[idx+7]
 
             #get transform between two views
             start_matrix = self.generate_matrix(start_xytheta[0], start_xytheta[1], start_xytheta[2])
