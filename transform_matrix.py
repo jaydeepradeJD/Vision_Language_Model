@@ -13,7 +13,7 @@ class transform_matrix():
         #a b c 
         #d e f
         #f h i
-
+        print("x: ", x, " y: ", y, " theta: ", theta, " z: ", z)
         a = x*x*(1-np.cos(theta)) + np.cos(theta)
         b = y*x*(1-np.cos(theta)) - z*np.sin(theta)
         c = x*z*(1-np.cos(theta)) + y*np.sin(theta)
@@ -50,10 +50,11 @@ class transform_matrix():
             metadata = [m.strip() for m in metadata]
             metadata = [float(m) if self.is_float(m) else m for m in metadata]
 
-        for idx in range(0, len(views) - 1, 2):
-
-            start_xytheta = metadata[idx+1], metadata[idx+2], metadata[idx+3]
-            end_xytheta = metadata[idx+5], metadata[idx+6], metadata[idx+7]
+        for idx in range(0, len(views) - 1, 2) :
+            start_meta_line = views[idx] * 4
+            end_meta_line = views[idx + 1] * 4
+            start_xytheta = metadata[start_meta_line+1], metadata[start_meta_line+2], metadata[start_meta_line+3]
+            end_xytheta = metadata[end_meta_line+1], metadata[end_meta_line+2], metadata[end_meta_line+3]
 
             #get transform between two views
             start_matrix = self.generate_matrix(start_xytheta[0], start_xytheta[1], start_xytheta[2])
