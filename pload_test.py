@@ -1,4 +1,5 @@
 from data import ProteinTransformDataset
+from data import ProteinDataset
 import os
 import argparse
 import numpy as np
@@ -8,10 +9,21 @@ from config import cfg
 
 def main(cfg):
 	train_dataset = ProteinTransformDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING)
+	test_dataset = ProteinDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING, big_dataset=True)
+	
 
-	print(train_dataset[2])
 	train_data_loader = DataLoader(train_dataset, batch_size=cfg.CONST.BATCH_SIZE, shuffle=True, num_workers=cfg.CONST.NUM_WORKER,
 													drop_last=True)
+	test_data_loader = DataLoader(test_dataset, batch_size=cfg.CONST.BATCH_SIZE, shuffle=True, num_workers=cfg.CONST.NUM_WORKER,
+													drop_last=True)
+	
+	print(next(iter(train_data_loader)))
+
+	# print(train_dataset.dirs)
+	# next(iter(train_data_loader))
+	# print(train_dataset.pre_array)
+	# print("*************")
+	# print(train_dataset.after_array)
 	
 
 
@@ -97,5 +109,7 @@ if __name__ == '__main__':
 
 	if args.num_workers is not None:
 		cfg.CONST.NUM_WORKER  = args.num_workers
+
+	
 
 	main(cfg)

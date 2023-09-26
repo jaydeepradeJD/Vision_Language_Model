@@ -13,7 +13,9 @@ class transform_matrix():
         #a b c 
         #d e f
         #f h i
-        print("x: ", x, " y: ", y, " theta: ", theta, " z: ", z)
+        #
+        # print("x: ", x, " y: ", y, " theta: ", theta, " z: ", z)
+        theta = np.radians(theta)
         a = x*x*(1-np.cos(theta)) + np.cos(theta)
         b = y*x*(1-np.cos(theta)) - z*np.sin(theta)
         c = x*z*(1-np.cos(theta)) + y*np.sin(theta)
@@ -33,10 +35,10 @@ class transform_matrix():
         except ValueError:
             return False
 
-    def get_transforms(self, views, filepath):
+    def get_transforms(self, views_input, filepath):
         #views is a list of files to load
         transform_list = []
-        views = [int(v) for v in views]
+        views = [int(v) for v in views_input]
 
         #with open(self.train_samples_filename, 'r') as f:
         #    dir_list = f.readlines()
@@ -65,7 +67,7 @@ class transform_matrix():
 
             transform_list.append(product)
 
-        return transform_list
+        return np.asarray(transform_list)
 
 def main():
     transform = transform_matrix()
@@ -81,7 +83,7 @@ def main():
     filepath = os.path.join(str(dirs[1]), str(representation_type))
     views = random.sample(range(25), n_views_rendering * 2)
 
-    print(transform.get_transforms(views, filepath))
+    #print(transform.get_transforms(views, filepath))
 
 if __name__ == '__main__':
     main()

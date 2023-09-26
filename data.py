@@ -264,6 +264,8 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 		self.grayscale = grayscale
 		self.background = background
 		self.transform_matrices = transform_matrix()
+		self.pre_array = []
+		self.after_array = []
 
 
 		if self.dataset_type == 'train':
@@ -300,7 +302,7 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 
 			matrices = self.transform_matrices.get_transforms(views, filepath)
 			rendering_images = [[],[]]
-			
+
 			for i in range(2):
 				for v in views[i::2]:
 					if self.background:
@@ -312,13 +314,10 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 					if self.grayscale:
 						rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
 					rendering_images[i].append(rendering_image)
-
+				self.pre_array = rendering_images[i]
 				rendering_images[i] = np.asarray(rendering_images[i])
 				if self.grayscale:
 					rendering_images[i] = np.expand_dims(rendering_images[i], axis=-1) 
-			
-			return rendering_images, matrices
-
-
-			
-			
+				self.after_array = rendering_images[i]
+			return rendering_images[0], rendering_images[1], matrices
+		
