@@ -67,7 +67,7 @@ if __name__ == '__main__':
 	parser.add_argument('--weights', dest='weights',
 						help='Initialize network from the weights file', default=None)
 	parser.add_argument('--n_views', dest='n_views_rendering',
-						help='number of views used', default=5, type=int)
+						help='number of views used', default=1, type=int)
 	parser.add_argument('--loss', dest='loss',
 						help='Loss Function', default='bce', type=str)
 	parser.add_argument('--lr', dest='lr',

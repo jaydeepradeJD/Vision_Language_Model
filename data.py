@@ -4,7 +4,8 @@ import numpy as np
 import random
 import torch.utils.data.dataset
 import torch
-from transform_matrix import transform_matrix
+from utils.transform_matrix import transform_matrix
+
 
 
 class ProteinDataset(torch.utils.data.Dataset):
@@ -264,8 +265,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 		self.grayscale = grayscale
 		self.background = background
 		self.transform_matrices = transform_matrix()
-		self.pre_array = []
-		self.after_array = []
 
 
 		if self.dataset_type == 'train':
@@ -276,6 +275,7 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 			with open(train_samples_filename, 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
+				self.dirs = self.dirs * self.cfg.CONST.N_VIEWS_RENDERING
 
 		if self.dataset_type == 'val':
 			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
@@ -298,8 +298,8 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 		if not (self.dataset_type == 'test'):
 			filepath = os.path.join(str(self.dirs[idx]), str(self.representation_type))
 			#double the views for pairing
-			views = random.sample(range(25), self.n_views_rendering * 2)
-			matrices = self.transform_matrices.get_transforms(views, filepath)
+			views = random.sample(range(25), 2)
+			matrix = self.transform_matrices.get_transforms(views, filepath)
 			rendering_images = [[],[]]
 
 			for i in range(2):
@@ -317,5 +317,5 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 				if self.grayscale:
 					rendering_images[i] = np.expand_dims(rendering_images[i], axis=-1) 
 			
-			return rendering_images[0], rendering_images[1], matrices
+			return rendering_images[0], rendering_images[1], matrix
 		
