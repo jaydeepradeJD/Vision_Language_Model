@@ -299,7 +299,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 			filepath = os.path.join(str(self.dirs[idx]), str(self.representation_type))
 			#double the views for pairing
 			views = random.sample(range(25), self.n_views_rendering * 2)
-
 			matrices = self.transform_matrices.get_transforms(views, filepath)
 			rendering_images = [[],[]]
 
@@ -311,6 +310,7 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 						filename = os.path.join(filepath, str(v) +'.png')
 					if not self.grayscale:
 						rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+
 					if self.grayscale:
 						rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
 					rendering_images[i].append(rendering_image)
@@ -319,5 +319,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 				if self.grayscale:
 					rendering_images[i] = np.expand_dims(rendering_images[i], axis=-1) 
 				self.after_array = rendering_images[i]
+			
 			return rendering_images[0], rendering_images[1], matrices
 		

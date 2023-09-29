@@ -61,9 +61,22 @@ class transform_matrix():
             #get transform between two views
             start_matrix = self.generate_matrix(start_xytheta[0], start_xytheta[1], start_xytheta[2])
             end_matrix = self.generate_matrix(end_xytheta[0], end_xytheta[1], end_xytheta[2])
+
             end_inverted = np.linalg.inv(end_matrix)
 
-            product = np.matmul(start_matrix, end_inverted)
+            product = np.dot(start_matrix, end_inverted)
+            
+            print("start matrix: ")
+            print(start_matrix)
+
+            print("end matrix: ")
+            print(end_matrix)
+
+            print("end inverted: ")
+            print(end_inverted)
+
+            print("product: ")
+            print(product)
 
             transform_list.append(product)
 

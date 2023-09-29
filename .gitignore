@@ -11,3 +11,4 @@ trainv2.slurm
 try.py
 *.slurm
 log_archive
+utils
