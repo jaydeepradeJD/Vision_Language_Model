@@ -350,3 +350,32 @@ class OnlySeq_Decoder_previous_4mn_params(nn.Module):
 		output = self.layer5(x)
 		
 		return output.squeeze(dim=1)
+
+class Matrix_Decoder(nn.Module):
+	def __init__(self, cfg):
+		super(Matrix_Decoder, self).__init__()
+		self.cfg = cfg
+		self.c_in = 400 #240 #1360 #240
+		self.c_out = 512 
+		# Layer Definition
+						
+
+		self.fc1 = nn.Sequential(
+			nn.Linear(2048, 2048),
+			nn.ReLU()
+		)
+
+		self.fc2 = nn.Sequential(
+			nn.Linear(2048, 9),
+			nn.ReLU()
+		)
+
+	def forward(self, x):
+		x = x.flatten(start_dim=1)
+
+		x = self.fc1(x)
+		x = self.fc2(x)
+
+		output = x.view(-1, 3, 3)
+		
+		return output.squeeze(dim=1)

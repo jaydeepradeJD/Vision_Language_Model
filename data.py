@@ -4,7 +4,7 @@ import numpy as np
 import random
 import torch.utils.data.dataset
 import torch
-from utils.transform_matrix import transform_matrix
+from transform_matrix import transform_matrix
 
 
 
@@ -255,8 +255,8 @@ class ProteinAutoEncoderDataset(torch.utils.data.Dataset):
 
 		
 class ProteinTransformDataset(torch.utils.data.Dataset):
-	def __init__(self, cfg, dataset_type, n_views_rendering, representation_type='surface_trimesh_voxels', transforms=None, grayscale=False, background=False):
-		self.representation_type = representation_type
+	def __init__(self, cfg, dataset_type, n_views_rendering, representation_type='surface_trimesh_voxels', transforms=None, grayscale=False, background=False, big_dataset=False):
+		self.representation_type = 'surface_trimesh_voxels'
 		self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
 		self.cfg = cfg
 		self.dataset_type = dataset_type
@@ -266,7 +266,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 		self.background = background
 		self.transform_matrices = transform_matrix()
 
-
 		if self.dataset_type == 'train':
 			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
 				train_samples_filename = os.path.join(self.metadata_path, 'train_samples.txt')
@@ -275,6 +274,7 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 			with open(train_samples_filename, 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
+				self.dirs = self.dirs * self.cfg.CONST.N_VIEWS_RENDERING
 				self.dirs = self.dirs * self.cfg.CONST.N_VIEWS_RENDERING
 
 		if self.dataset_type == 'val':
@@ -300,6 +300,8 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 			#double the views for pairing
 			views = random.sample(range(25), 2)
 			matrix = self.transform_matrices.get_transforms(views, filepath)
+			views = random.sample(range(25), 2)
+			matrix = self.transform_matrices.get_transforms(views, filepath)
 			rendering_images = [[],[]]
 
 			for i in range(2):
@@ -316,6 +318,11 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 				rendering_images[i] = np.asarray(rendering_images[i])
 				if self.grayscale:
 					rendering_images[i] = np.expand_dims(rendering_images[i], axis=-1) 
+
+				if self.transforms:
+					rendering_images[i] = self.transforms(rendering_images[i])
+ 
 			
+			return rendering_images[0], rendering_images[1], matrix
 			return rendering_images[0], rendering_images[1], matrix
 		

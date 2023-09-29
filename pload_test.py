@@ -16,8 +16,6 @@ def main(cfg):
 													drop_last=True)
 	test_data_loader = DataLoader(test_dataset, batch_size=cfg.CONST.BATCH_SIZE, shuffle=True, num_workers=cfg.CONST.NUM_WORKER,
 													drop_last=True)
-	
-	print(next(iter(train_data_loader)))
 
 	# print(train_dataset.dirs)
 	# next(iter(train_data_loader))

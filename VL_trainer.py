@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch
-from models.encoder import Encoder
-from models.decoder import Decoder, OnlySeq_Decoder
+from models.encoder import Encoder, Matrix_Encoder
+from models.decoder import Decoder, Matrix_Decoder, OnlySeq_Decoder
 from models.autoencoder import Encoder as AE_encoder
 from models.autoencoder import Decoder as AE_decoder
 
@@ -263,3 +263,50 @@ class AutoEncoder_old(pl.LightningModule):
 			  
 		return opt
 
+class Matrix_Model(pl.LightningModule):
+	"""docstring for ClassName"""
+	def __init__(self, cfg):
+		super(Matrix_Model, self).__init__()
+		self.cfg = cfg
+		self.encoder = Encoder(self.cfg)
+		self.decoder = Matrix_Decoder(self.cfg)
+		self.mlp = MLP(self.cfg)
+
+		self.loss = torch.nn.BCELoss()
+		
+	def forward(self, img_a, img_b):
+		img_features_a = self.encoder(img_a)
+		img_features_b = self.encoder(img_b)
+		# batch_size,320(64x5),4,4  or batch_size,160(32*5),4,4
+		# batch_size,1280
+		combined_features = torch.cat([img_features_a, img_features_b], dim=1)
+		predicted = self.decoder(combined_features)
+
+		return predicted
+
+	def training_step(self, batch, batch_idx):
+		img_a, img_b, target = batch 
+		
+		predicted = self.forward(img_a, img_b)
+		
+		loss = self.loss(predicted, target)
+		self.log_dict({'train/loss':loss})
+		return loss
+	
+	def validation_step(self, batch, batch_idx):
+		img_a, img_b, target = batch 
+		
+		predicted = self.forward(img_a, img_b)
+		loss = self.loss(predicted, target)
+		self.log_dict({'val/loss':loss})
+		return loss
+	
+	def configure_optimizers(self):                         
+		lr = self.cfg.TRAIN.LEARNING_RATE
+		weight_decay = self.cfg.TRAIN.L2_PENALTY
+		
+		opt = torch.optim.Adam(list(self.encoder.parameters())+
+			list(self.decoder.parameters())+
+			list(self.mlp.parameters()), lr, weight_decay=weight_decay)
+			  
+		return opt
