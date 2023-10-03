@@ -12,7 +12,10 @@ __C.DATASET.GRAYSCALE                      = False
 __C.DATASET.AUTOENCODER                    = False
 __C.DATASET.BACKGROUND                     = False
 __C.DATASET.BIGDATA                        = False
-__C.DATASET.NUM_SAMPLES                    = '10k'
+__C.DATASET.NUM_SAMPLES                    = 'whole_data'  # '10k' '100k' '150k 'whole_data'
+__C.DATASET.OUTPUT_RES                     = 32
+__C.DATASET.FIXED_VIEWS                    = False
+
 #
 # Common
 #
@@ -31,7 +34,7 @@ __C.CONST.NODES                             = 1
 __C.DIR                                     = edict()
 __C.DIR.OUT_PATH                            = './logs'
 __C.DIR.EXPERIMENT_NAME                     = 'experiment1'
-__C.DIR.PROJECT_NAME                        = 'Vision_Language_Protein'
+__C.DIR.PROJECT_NAME                        = 'Protein_Structure_Prediction'
 __C.DIR.WEIGHTS                             = None
 __C.DIR.AE_WEIGHTS                          = None
 #
@@ -40,12 +43,15 @@ __C.DIR.AE_WEIGHTS                          = None
 __C.NETWORK                                 = edict()
 __C.NETWORK.AFM_ENCODER                     = False
 __C.NETWORK.LATENT_DIM						= 4096
-__C.NETWORK.GROUP_NORM                      = None
+__C.NETWORK.GROUP_NORM_GROUPS               = 8
 __C.NETWORK.DROPOUT                         = None
 __C.NETWORK.TRANSFORMER                     = False
 __C.NETWORK.TRANSFORMER_NUM_BLOCKS          = 1
 __C.NETWORK.TRANSFORMER_NUM_HEADS           = 8
 __C.NETWORK.DISCRIMINATOR                   = False
+__C.NETWORK.PIX2VOX                         = False
+__C.NETWORK.USE_SEQ                         = False
+__C.NETWORK.OUTPUT_RES                      = 32
 #
 # Training
 #
@@ -71,3 +77,6 @@ __C.TRAIN.ONLYSEQ                           = False
 __C.TEST                                    = edict()
 __C.TEST.IS_TEST                            = False
 __C.TEST.NUM_SAMPLES                        = 1
+__C.TEST.TEST_WRAC                          = False
+
+

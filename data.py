@@ -7,7 +7,7 @@ import torch
 
 
 class ProteinDataset(torch.utils.data.Dataset):
-	def __init__(self, cfg, dataset_type, n_views_rendering, representation_type='surface_with_inout', transforms=None, grayscale=False, background=False, big_dataset=False):
+	def __init__(self, cfg, dataset_type, n_views_rendering, representation_type='surface_with_inout', transforms=None, grayscale=False, background=False, big_dataset=False, pix2vox=False):
 		self.cfg = cfg
 		self.dataset_type = dataset_type
 		self.n_views_rendering = n_views_rendering
@@ -16,11 +16,14 @@ class ProteinDataset(torch.utils.data.Dataset):
 		self.grayscale = grayscale
 		self.background = background
 		self.big_dataset = big_dataset
+		self.pix2vox = pix2vox
 		
 		if self.big_dataset:
 			self.representation_type = 'surface_trimesh_voxels'
-			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
-			self.seq_embd_path = '/work/mech-ai-scratch/jrrade/Protein/AF_swissprot_seq_embds'
+			if self.cfg.DATASET.FIXED_VIEWS:
+				self.representation_type = 'fixed_views'
+			self.metadata_path = '/scratch/bbmw/jd23697/scripts_bigData'
+			self.seq_embd_path = '/scratch/bbmw/jd23697/AF_swissprot_seq_embds'
 			
 		else:
 			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts'
@@ -32,6 +35,8 @@ class ProteinDataset(torch.utils.data.Dataset):
 				train_samples_filename = os.path.join(self.metadata_path, 'train_samples.txt')
 			else:
 				train_samples_filename = os.path.join(self.metadata_path, 'train_samples_%s.txt'%self.cfg.DATASET.NUM_SAMPLES)
+			if self.cfg.DATASET.FIXED_VIEWS:
+				train_samples_filename = os.path.join(self.metadata_path, 'train_samples_fixed_views.txt')
 			with open(train_samples_filename, 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
@@ -42,6 +47,8 @@ class ProteinDataset(torch.utils.data.Dataset):
 				val_samples_filename = os.path.join(self.metadata_path, 'val_samples.txt')
 			else:
 				val_samples_filename = os.path.join(self.metadata_path, 'val_samples_%s.txt'%self.cfg.DATASET.NUM_SAMPLES)
+			if self.cfg.DATASET.FIXED_VIEWS:
+				val_samples_filename = os.path.join(self.metadata_path, 'val_samples_fixed_views.txt')
 			with open(val_samples_filename, 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
@@ -52,13 +59,17 @@ class ProteinDataset(torch.utils.data.Dataset):
 				self.dirs = [d.strip() for d in dir_list]
 
 	def __len__(self):
-		return len(self.dirs)
+		if self.dataset_type == 'test':
+			return 100
+		else:
+			return len(self.dirs)
 
 	def __getitem__(self, idx):
 		if not (self.dataset_type == 'test'):
 
 			filepath = os.path.join(str(self.dirs[idx]), str(self.representation_type))
-			if self.representation_type == 'surface_with_inout_fixed_views':
+			#if self.representation_type == 'surface_with_inout_fixed_views':
+			if self.cfg.DATASET.FIXED_VIEWS:
 				views = random.sample(range(6), self.n_views_rendering)
 			else:
 				views = random.sample(range(25), self.n_views_rendering)
@@ -79,10 +90,15 @@ class ProteinDataset(torch.utils.data.Dataset):
 			if self.grayscale:
 				rendering_images = np.expand_dims(rendering_images, axis=-1)
 			
-			if self.representation_type == 'surface_with_inout_fixed_views':
-				filepath = os.path.join(str(self.dirs[idx]), 'surface_with_inout')
+			# if self.representation_type == 'surface_with_inout_fixed_views':
+			# 	filepath = os.path.join(str(self.dirs[idx]), 'surface_with_inout')
+			if self.cfg.DATASET.FIXED_VIEWS:
+				volume_path = '/scratch/bbmw/jd23697/AF_swissprot_transfer_to_bridges2'
+				folder_name = self.dirs[idx].split('/')[-1]
+				filepath = os.path.join(volume_path, folder_name,'surface_trimesh_voxels')
 
-			volume = np.load(os.path.join(filepath, '32.npz'))['arr_0']
+
+			volume = np.load(os.path.join(filepath, '%s.npz'%self.cfg.DATASET.OUTPUT_RES))['arr_0']
 			# volume = np.load(os.path.join(filepath, '128.npz'))['arr_0']
 			
 			volume = volume.astype(np.float32)
@@ -90,25 +106,28 @@ class ProteinDataset(torch.utils.data.Dataset):
 			if self.transforms:
 				rendering_images = self.transforms(rendering_images)
 
-			# Sequnece embeddings
-			folder_name =  self.dirs[idx].split('/')[-1]
-			seq_emd_filename = folder_name.split('.')[0] + '_esm2_t33.txt'
-			seq_emd_path = os.path.join(self.seq_embd_path, folder_name, seq_emd_filename)
-			seq_emd = np.loadtxt(seq_emd_path, dtype=np.float32)
-			seq_emd = torch.from_numpy(seq_emd)
-			return rendering_images, seq_emd, volume
-
+			if self.pix2vox and not (self.cfg.NETWORK.USE_SEQ):
+				return rendering_images, volume
+			else:
+				# Sequnece embeddings
+				folder_name =  self.dirs[idx].split('/')[-1]
+				seq_emd_filename = folder_name.split('.')[0] + '_esm2_t33.txt'
+				seq_emd_path = os.path.join(self.seq_embd_path, folder_name, seq_emd_filename)
+				seq_emd = np.loadtxt(seq_emd_path, dtype=np.float32)
+				seq_emd = torch.from_numpy(seq_emd)
+				return rendering_images, seq_emd, volume
+			
 		else:
 
-			filepath = str(self.dirs[idx])
+			#filepath = str(self.dirs[idx])
 			rendering_images = []
 			
 			# if filepath.split('/')[-1] = 'Extracted_SingleMolecule':
-			if idx < 5 :
+			if idx < 50: #5 :
 				if self.background:
-					filepath = '/work/mech-ai-scratch/jrrade/Protein/WRAC/Extracted_SingleMolecule_with_bg/'
+					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_with_bg/'
 				else:
-					filepath = '/work/mech-ai-scratch/jrrade/Protein/WRAC/Extracted_SingleMolecule/'
+					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule/'
 				image_names = os.listdir(filepath)
 				views = random.sample(range(22), self.n_views_rendering)
 				for v in views:
@@ -119,7 +138,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 						rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
 					rendering_images.append(rendering_image)
 			else:
-				filepath = '/work/mech-ai-scratch/jrrade/Protein/WRAC/%s'%self.representation_type
+				filepath = '/scratch/bbmw/jd23697/WRAC/surface_with_inout'
 				if self.representation_type == 'surface_with_inout_fixed_views':
 					views = random.sample(range(6), self.n_views_rendering)
 				else:
@@ -140,7 +159,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 				rendering_images = np.expand_dims(rendering_images, axis=-1)
 			
 
-			volume = np.load(os.path.join('/work/mech-ai-scratch/jrrade/Protein/WRAC/%s/'%self.representation_type, '32.npz'))['arr_0']
+			volume = np.load(os.path.join('/scratch/bbmw/jd23697/WRAC/surface_with_inout/', '%s.npz'%self.cfg.DATASET.OUTPUT_RES))['arr_0']
 			# volume = np.load(os.path.join(filepath, '128.npz'))['arr_0']
 			
 			volume = volume.astype(np.float32)
@@ -148,8 +167,18 @@ class ProteinDataset(torch.utils.data.Dataset):
 			if self.transforms:
 				rendering_images = self.transforms(rendering_images)
 			
-			return 'WRAC_Protein', 'WRAC_Protein', rendering_images, volume
-
+			# return 'WRAC_Protein', 'WRAC_Protein', rendering_images, volume
+			if self.pix2vox and not (self.cfg.NETWORK.USE_SEQ):
+				return rendering_images, volume
+			else:
+				# Sequnece embeddings
+				folder_name =  self.dirs[idx].split('/')[-1]
+				seq_emd_filename = folder_name.split('.')[0] + '_esm2_t33.txt'
+				seq_emd_path = os.path.join(self.seq_embd_path, folder_name, seq_emd_filename)
+				seq_emd = np.loadtxt(seq_emd_path, dtype=np.float32)
+				seq_emd = torch.from_numpy(seq_emd)
+				return rendering_images, seq_emd, volume
+			
 
 class SequenceDataset(torch.utils.data.Dataset):
 	def __init__(self, dataset_type, representation_type='surface_with_inout', big_dataset=False):
@@ -159,20 +188,18 @@ class SequenceDataset(torch.utils.data.Dataset):
 		if self.big_dataset:
 			self.representation_type = 'surface_trimesh_voxels'
 		if self.big_dataset:
-			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
-			self.seq_embd_path = '/work/mech-ai-scratch/jrrade/Protein/AF_swissprot_seq_embds'
+			self.metadata_path = '/scratch/bbmw/jd23697/scripts_bigData'
+			self.seq_embd_path = '/scratch/bbmw/jd23697/AF_swissprot_seq_embds'
 		else:
 			self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/scripts' 
 			self.seq_embd_path = '/work/mech-ai-scratch/jrrade/Protein/TmAlphaFold/PDBs_seq_emds'
 		if self.dataset_type == 'train':
-			# with open(os.path.join(self.metadata_path, 'train_samples.txt'), 'r') as f:
-			with open(os.path.join(self.metadata_path, 'train_samples_256.txt'), 'r') as f:
+			with open(os.path.join(self.metadata_path, 'train_samples.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
 		if self.dataset_type == 'val':
-			# with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
-			with open(os.path.join(self.metadata_path, 'val_samples_256.txt'), 'r') as f:
+			with open(os.path.join(self.metadata_path, 'val_samples.txt'), 'r') as f:
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 
@@ -239,7 +266,7 @@ class ProteinAutoEncoderDataset(torch.utils.data.Dataset):
 
 	def __len__(self):
 		return len(self.dirs)
-
+	
 	def __getitem__(self, idx):
 		
 		filename = self.dirs[idx]

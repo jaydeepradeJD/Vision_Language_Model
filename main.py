@@ -8,14 +8,14 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 from data import ProteinDataset, SequenceDataset, ProteinAutoEncoderDataset
-from VL_trainer import Model, OnlySeqModel, AutoEncoder, PretrainedAE_Model, AutoEncoder_old
+from VL_trainer import Model, OnlySeqModel, AutoEncoder, PretrainedAE_Model, AutoEncoder_old, Pix2Vox
 from config import cfg
 import utils.data_transforms
 from test import test
 
 def main(cfg):
 	if not os.path.exists(cfg.DIR.OUT_PATH):
-		os.makedirs(cfg.DIR.OUT_PATH)
+		os.makedirs(cfg.DIR.OUT_PATH, exist_ok=True)
 		# Set up data augmentation
 	print('#'*5)
 	print(cfg)
@@ -32,6 +32,11 @@ def main(cfg):
 			utils.data_transforms.Resize(IMG_SIZE),
 			utils.data_transforms.ToTensor(),
 			]) 
+		test_transforms = utils.data_transforms.Compose([
+			utils.data_transforms.Resize(IMG_SIZE),
+			utils.data_transforms.ToTensor(),
+			]) 
+
 	
 	if cfg.DATASET.AUTOENCODER:
 		train_transforms = utils.data_transforms.Compose([
@@ -39,6 +44,10 @@ def main(cfg):
 			utils.data_transforms.ToTensorV2(),
 			])
 		val_transforms = utils.data_transforms.Compose([
+			utils.data_transforms.ResizeV2(IMG_SIZE),
+			utils.data_transforms.ToTensorV2(),
+			]) 
+		test_transforms = utils.data_transforms.Compose([
 			utils.data_transforms.ResizeV2(IMG_SIZE),
 			utils.data_transforms.ToTensorV2(),
 			]) 
@@ -50,8 +59,10 @@ def main(cfg):
 	# 	])
 	# Dataset
 	if not cfg.DATASET.AUTOENCODER and not cfg.TRAIN.ONLYSEQ:
-		train_dataset = ProteinDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA)
-		val_dataset = ProteinDataset(cfg, 'val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA)
+		train_dataset = ProteinDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
+		val_dataset = ProteinDataset(cfg, 'val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
+		test_dataset = ProteinDataset(cfg, 'test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
+		
 		# test_dataset = utils.data_loaders.ProteinDataset('test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE)
 		# test_dataset = None
 
@@ -81,11 +92,11 @@ def main(cfg):
 												  num_workers=cfg.CONST.NUM_WORKER,
 												  pin_memory=True,
 												  shuffle=False)
-	# if test_dataset is not None:
-	# 	test_data_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-	# 											  batch_size=1,
-	# 											  num_workers=1,
-	# 											  shuffle=False)
+	if test_dataset is not None:
+		test_data_loader = torch.utils.data.DataLoader(dataset=test_dataset,
+												  batch_size=1,
+												  num_workers=1,
+												  shuffle=False)
 
 	# Initiate the Model
 	
@@ -103,6 +114,8 @@ def main(cfg):
 	if cfg.TRAIN.ONLYSEQ:
 		model = OnlySeqModel(cfg)
 
+	if cfg.NETWORK.PIX2VOX:
+		model = Pix2Vox(cfg)
 	if not cfg.TEST.IS_TEST:		
 		# Initiate the trainer
 		logger = pl.loggers.TensorBoardLogger(cfg.DIR.OUT_PATH, name=cfg.DIR.EXPERIMENT_NAME)
@@ -111,7 +124,7 @@ def main(cfg):
 											project=cfg.DIR.PROJECT_NAME, dir=cfg.DIR.OUT_PATH)
 
 		monitor_val = 'val/loss'
-		if cfg.NETWORK.DISCRIMINATOR:
+		if cfg.NETWORK.DISCRIMINATOR or cfg.NETWORK.PIX2VOX:
 			monitor_val = 'val/total_loss'
 		checkpoint = ModelCheckpoint(monitor=monitor_val,
 									dirpath=logger.log_dir, 
@@ -135,7 +148,10 @@ def main(cfg):
 		trainer.fit(model, train_data_loader, val_data_loader, ckpt_path=cfg.DIR.WEIGHTS)
 
 	if cfg.TEST.IS_TEST:
-		test(model, train_data_loader, val_data_loader, cfg.DIR.WEIGHTS, cfg.DIR.OUT_PATH)
+		if cfg.TEST.TEST_WRAC:
+			test(model, test_data_loader=test_data_loader, weight_path=cfg.DIR.WEIGHTS, save_dir=cfg.DIR.OUT_PATH)
+		else:
+			test(model, train_data_loader=train_data_loader, val_data_loader=val_data_loader, weight_path=cfg.DIR.WEIGHTS, save_dir=cfg.DIR.OUT_PATH)
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Vision Language Models')
 	parser.add_argument('--save_dir', default='./logs/',
@@ -179,8 +195,8 @@ if __name__ == '__main__':
 						help='Use images with added background')
 	parser.add_argument('--ae_weights', dest='ae_weights',
 						help='Initialize Encoder network from the weights file', default=None)
-	parser.add_argument('-gn', '--gn', action='store_true',
-						help='Use Group Normalization')
+	parser.add_argument('-gn_num', '--gn_num', default=8, type=int,
+						help='Number of groups for GroupNorm')
 	parser.add_argument('-nodes','--num_nodes', default=None, type=int,
 						help='Number of nodes for training')
 	parser.add_argument('-OnlySeq', '--OnlySeq', action='store_true',
@@ -199,10 +215,23 @@ if __name__ == '__main__':
 						help='Perform Inferencing', action='store_true')
 	parser.add_argument('--num_test_samples', dest='num_test_samples',
 						help='Number of samples to perform test ons', default=1, type=int)
+	parser.add_argument('--test_wrac', dest='test_wrac',
+						help='Testing on WRAC protein', action='store_true')
 	parser.add_argument('--disc', dest='disc',
 						help='Use Discriminator', action='store_true')
 	parser.add_argument('--num_samples', dest='num_samples',
-						help='Numer of samples to use for training', default='10k', type=str)
+						help='Numer of samples to use for training', default='whole_data', type=str)
+	parser.add_argument('-pix2vox', '--pix2vox', action='store_true',
+						help='If Using Pix2Vox architecture')
+	parser.add_argument('-use_seq', '--use_seq', action='store_true',
+						help='Use ESM-2 Sequence embedding')
+	parser.add_argument('--output_res', dest='output_res',
+						help='The resolution of Output', default=32, type=int)
+	parser.add_argument('--latent_dim', dest='latent_dim',
+						help='Latent space dimensions', default=4096, type=int)
+	parser.add_argument('--fixed_views', dest='fixed_views',
+						help='Use Fixed views', action='store_true')
+	
 	
 	
 	args = parser.parse_args()
@@ -265,8 +294,8 @@ if __name__ == '__main__':
 
 	if args.bg:
 		cfg.DATASET.BACKGROUND = True
-	if args.gn:
-		cfg.NETWORK.GROUP_NORM = True
+	if args.gn_num:
+		cfg.NETWORK.GROUP_NORM_GROUPS = args.gn_num
 	if args.num_nodes is not None:
 		cfg.CONST.NODES = args.num_nodes
 	if args.OnlySeq:
@@ -284,10 +313,26 @@ if __name__ == '__main__':
 	if args.test:
 		cfg.TEST.IS_TEST = True
 		cfg.TEST.NUM_SAMPLES = args.num_test_samples
+		cfg.TEST.TEST_WRAC = args.test_wrac
 
 	if args.disc:
 		cfg.NETWORK.DISCRIMINATOR = True
 	
 	if args.num_samples is not None:
 		cfg.DATASET.NUM_SAMPLES = args.num_samples
+	
+	if args.pix2vox:
+		cfg.NETWORK.PIX2VOX = True
+	if args.use_seq:
+		cfg.NETWORK.USE_SEQ = True
+	if args.output_res is not None:
+		cfg.NETWORK.OUTPUT_RES = args.output_res
+		cfg.DATASET.OUTPUT_RES = args.output_res
+	if args.latent_dim is not None:
+		cfg.NETWORK.LATENT_DIM = args.latent_dim
+	
+	if args.fixed_views:
+		cfg.DATASET.FIXED_VIEWS = True
+		cfg.CONST.N_VIEWS_RENDERING = 6
+
 	main(cfg)
