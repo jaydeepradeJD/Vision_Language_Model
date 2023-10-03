@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 import torch
-from models.encoder import Encoder, Matrix_Encoder
+from models.encoder import Encoder
 from models.decoder import Decoder, Matrix_Decoder, OnlySeq_Decoder
 from models.autoencoder import Encoder as AE_encoder
 from models.autoencoder import Decoder as AE_decoder

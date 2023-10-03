@@ -113,6 +113,7 @@ class Encoder(torch.nn.Module):
 		# print(rendering_images.size())  # torch.Size([batch_size, n_views, img_c, img_h, img_w])
 		rendering_images = rendering_images.permute(1, 0, 2, 3, 4).contiguous()
 		rendering_images = torch.split(rendering_images, 1, dim=0)
+
 		image_features = []
 
 		for img in rendering_images:
@@ -235,7 +236,7 @@ class Matrix_Encoder(torch.nn.Module):
 			features = self.layer2(features)
 			features = self.layer3(features)
 			features = self.layer4(features)
-			print(features.shape)
+			
 			encoded_features = self.final_layer(features)
 			image_features.append(encoded_features)
 

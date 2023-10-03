@@ -9,6 +9,12 @@ class transform_matrix():
         #self.metadata_path = '/work/mech-ai-scratch/jrrade/Protein/scripts_bigData'
         #self.train_samples_filename = os.path.join(self.metadata_path, 'train_samples_128.txt')
 
+    def matrix_element_normalize(self, element: float):
+        shifted = element + 1
+        scaled = shifted / 2
+        return scaled
+        
+
     def generate_matrix(self, x, y, theta, z = 0):
         #a b c 
         #d e f
@@ -28,7 +34,7 @@ class transform_matrix():
 
         output = np.array([[a,b,c],[d,e,f],[g,h,i]])
 
-        return output.astype(np.float32)
+        return output
     
     def is_float(self, string):
         try:
@@ -67,7 +73,14 @@ class transform_matrix():
             end_inverted = np.linalg.inv(end_matrix)
 
             product = np.dot(start_matrix, end_inverted)
-            
-            transform_list.append(product)
 
-        return np.asarray(transform_list[0])
+            normalize = np.vectorize(self.matrix_element_normalize)
+            normalized_matrix = normalize(product)
+         
+            transform_list.append(normalized_matrix)
+
+
+
+
+
+        return np.asarray(transform_list[0]).astype(np.float32)

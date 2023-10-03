@@ -378,4 +378,4 @@ class Matrix_Decoder(nn.Module):
 
 		output = x.view(-1, 3, 3)
 		
-		return output.squeeze(dim=1)
+		return output

@@ -275,7 +275,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 				dir_list = f.readlines()
 				self.dirs = [d.strip() for d in dir_list]
 				self.dirs = self.dirs * self.cfg.CONST.N_VIEWS_RENDERING
-				self.dirs = self.dirs * self.cfg.CONST.N_VIEWS_RENDERING
 
 		if self.dataset_type == 'val':
 			if self.cfg.DATASET.NUM_SAMPLES == 'whole_data':
@@ -300,8 +299,6 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 			#double the views for pairing
 			views = random.sample(range(25), 2)
 			matrix = self.transform_matrices.get_transforms(views, filepath)
-			views = random.sample(range(25), 2)
-			matrix = self.transform_matrices.get_transforms(views, filepath)
 			rendering_images = [[],[]]
 
 			for i in range(2):
@@ -323,6 +320,5 @@ class ProteinTransformDataset(torch.utils.data.Dataset):
 					rendering_images[i] = self.transforms(rendering_images[i])
  
 			
-			return rendering_images[0], rendering_images[1], matrix
 			return rendering_images[0], rendering_images[1], matrix
 		

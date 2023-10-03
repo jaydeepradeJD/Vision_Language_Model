@@ -18,7 +18,8 @@ def main(cfg):
 													drop_last=True)
 
 	# print(train_dataset.dirs)
-	# next(iter(train_data_loader))
+	next(iter(train_data_loader))
+
 	# print(train_dataset.pre_array)
 	# print("*************")
 	# print(train_dataset.after_array)
@@ -26,27 +27,6 @@ def main(cfg):
 
 
 	#expected length 128 * n_views
-
-def generate_matrix(x, y, theta, z = 0):
-	#a b c 
-	#d e f
-	#f h i
-	#
-	# print("x: ", x, " y: ", y, " theta: ", theta, " z: ", z)
-	theta = np.radians(theta)
-	a = x*x*(1-np.cos(theta)) + np.cos(theta)
-	b = y*x*(1-np.cos(theta)) - z*np.sin(theta)
-	c = x*z*(1-np.cos(theta)) + y*np.sin(theta)
-	d = y*x*(1-np.cos(theta)) + z*np.sin(theta)
-	e = y*y*(1-np.cos(theta)) + np.cos(theta)
-	f = y*z*(1-np.cos(theta)) - x*np.sin(theta)
-	g = x*z*(1-np.cos(theta)) - y*np.sin(theta)
-	h = y*z*(1-np.cos(theta)) + x*np.sin(theta)
-	i = z*z*(1-np.cos(theta)) + np.cos(theta)
-
-	return np.array([[a,b,c],[d,e,f],[g,h,i]])
-
-
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Vision Language Models')

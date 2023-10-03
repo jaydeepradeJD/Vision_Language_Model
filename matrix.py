@@ -290,4 +290,6 @@ if __name__ == '__main__':
 	
 	if args.num_samples is not None:
 		cfg.DATASET.NUM_SAMPLES = args.num_samples
+
+	cfg.DIR.OUT_PATH = os.path.join("/work/mech-ai-scratch/jmsrdgrs/vision_language_model/Vision_Language_Model/logs", cfg.DIR.EXPERIMENT_NAME)
 	main(cfg)
