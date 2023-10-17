@@ -17,7 +17,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 		self.background = background
 		self.big_dataset = big_dataset
 		self.pix2vox = pix2vox
-		
+		self.IMG_SIZE = self.cfg.CONST.IMG_H, self.cfg.CONST.IMG_W
 		if self.big_dataset:
 			self.representation_type = 'surface_trimesh_voxels'
 			if self.cfg.DATASET.FIXED_VIEWS:
@@ -60,7 +60,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 
 	def __len__(self):
 		if self.dataset_type == 'test':
-			return 100
+			return self.cfg.TEST.NUM_SAMPLES
 		else:
 			return len(self.dirs)
 
@@ -81,7 +81,13 @@ class ProteinDataset(torch.utils.data.Dataset):
 				else:
 					filename = os.path.join(filepath, str(v) +'.png')
 				if not self.grayscale:
-					rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+					try:
+						rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+					except AttributeError:
+						view = random.sample(range(25), 1)
+						filename = os.path.join(filepath, str(view) +'.png')
+						rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+
 				if self.grayscale:
 					rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
 				rendering_images.append(rendering_image)
@@ -123,26 +129,34 @@ class ProteinDataset(torch.utils.data.Dataset):
 			rendering_images = []
 			
 			# if filepath.split('/')[-1] = 'Extracted_SingleMolecule':
-			if idx < 50: #5 :
+			if idx < 0: #5 :
 				if self.background:
-					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_with_bg/'
+					# filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule/'
+					filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_V2/'
+					
 				else:
-					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule/'
+					# filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule/'
+					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_V2/'
+					
 				image_names = os.listdir(filepath)
-				views = random.sample(range(22), self.n_views_rendering)
+				# image_names = ['4.png', '9.png', '37.png', '45.png', '58.png']
+				views = random.sample(range(len(image_names)), self.n_views_rendering)
 				for v in views:
 					filename = os.path.join(filepath, image_names[v])
 					if not self.grayscale:
 						rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
 					if self.grayscale:
 						rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
+					rendering_image = processed_image = cv2.resize(rendering_image, self.IMG_SIZE)
 					rendering_images.append(rendering_image)
 			else:
 				filepath = '/scratch/bbmw/jd23697/WRAC/surface_with_inout'
-				if self.representation_type == 'surface_with_inout_fixed_views':
+				if self.cfg.DATASET.FIXED_VIEWS:
+					filepath = '/scratch/bbmw/jd23697/WRAC/surface_with_inout_fixed_views'
 					views = random.sample(range(6), self.n_views_rendering)
 				else:
 					views = random.sample(range(25), self.n_views_rendering)
+					#views = np.arange(self.n_views_rendering)
 				for v in views:
 					if self.background:
 						filename = os.path.join(filepath, str(v) +'_with_bg.png')

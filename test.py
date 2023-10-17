@@ -104,7 +104,7 @@ def test(model, train_data_loader=None, val_data_loader=None, test_data_loader=N
 			# print(iou,'--'*5 , iou2)
 			predicted = predicted.cpu().detach().squeeze().numpy()
 			target = target.cpu().detach().squeeze().numpy()
-			imgs = imgs.cpu().detach().squeeze().numpy()
+			imgs = imgs.cpu().detach().squeeze(dim=0).numpy()
 			if not os.path.exists(save_dir+'/test/imgs_'+str(idx)):
 				os.makedirs(save_dir+'/test/imgs_'+str(idx))
 			for i in range(imgs.shape[0]):

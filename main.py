@@ -59,9 +59,9 @@ def main(cfg):
 	# 	])
 	# Dataset
 	if not cfg.DATASET.AUTOENCODER and not cfg.TRAIN.ONLYSEQ:
-		train_dataset = ProteinDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
-		val_dataset = ProteinDataset(cfg, 'val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
-		test_dataset = ProteinDataset(cfg, 'test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
+		train_dataset = ProteinDataset(cfg, 'train', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, train_transforms, grayscale=cfg.DATASET.GRAYSCALE, background=cfg.DATASET.BACKGROUND, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
+		val_dataset = ProteinDataset(cfg, 'val', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, val_transforms, grayscale=cfg.DATASET.GRAYSCALE, background=cfg.DATASET.BACKGROUND, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
+		test_dataset = ProteinDataset(cfg, 'test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE, background=cfg.DATASET.BACKGROUND, big_dataset=cfg.DATASET.BIGDATA, pix2vox=cfg.NETWORK.PIX2VOX)
 		
 		# test_dataset = utils.data_loaders.ProteinDataset('test', cfg.CONST.N_VIEWS_RENDERING, cfg.CONST.REP, test_transforms, grayscale=cfg.DATASET.GRAYSCALE)
 		# test_dataset = None
