@@ -129,25 +129,32 @@ class ProteinDataset(torch.utils.data.Dataset):
 			rendering_images = []
 			
 			# if filepath.split('/')[-1] = 'Extracted_SingleMolecule':
-			if idx < 0: #5 :
+			if idx < 25: #5 :
 				if self.background:
 					# filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule/'
-					filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_V2/'
+					# # filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_V2/'
+					# filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_high_res/'
+					# filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_high_res_NeuralNetwork/'
+					filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_All/'
+					
 					
 				else:
 					# filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule/'
 					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_V2/'
 					
 				image_names = os.listdir(filepath)
-				# image_names = ['4.png', '9.png', '37.png', '45.png', '58.png']
+				# image_names = ['1.jpg', '2.jpg', '4.jpg', '7.jpg', '20.jpg', '24.jpg', '26.jpg']
+				# image_names = ['1_1.jpg', '2_1.jpg', '4_1.jpg', '4_4.jpg', '5_1.jpg', '5_5.jpg', '5_9.jpg']
 				views = random.sample(range(len(image_names)), self.n_views_rendering)
 				for v in views:
 					filename = os.path.join(filepath, image_names[v])
 					if not self.grayscale:
-						rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+						# rendering_image = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
+						rendering_image = cv2.imread(filename).astype(np.float32) / 255.
+						
 					if self.grayscale:
 						rendering_image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE).astype(np.float32) / 255.
-					rendering_image = processed_image = cv2.resize(rendering_image, self.IMG_SIZE)
+					rendering_image = cv2.resize(rendering_image, self.IMG_SIZE, interpolation=cv2.INTER_CUBIC)
 					rendering_images.append(rendering_image)
 			else:
 				filepath = '/scratch/bbmw/jd23697/WRAC/surface_with_inout'

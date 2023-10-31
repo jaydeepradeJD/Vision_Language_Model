@@ -57,7 +57,7 @@ class Resize(object):
 
 
         for img in rendering_images:
-            processed_image = cv2.resize(img, self.img_size)
+            processed_image = cv2.resize(img, self.img_size, interpolation=cv2.INTER_CUBIC)
             if rendering_images.shape[-1] == 1:
                 processed_image = np.expand_dims(processed_image, axis=-1) # for grayscale
             processed_images = np.append(processed_images, [processed_image], axis=0)
@@ -82,7 +82,7 @@ class ResizeV2(object):
     def __init__(self, img_size):
         self.img_size = img_size
     def __call__(self, rendering_images):
-        processed_images = cv2.resize(rendering_images, self.img_size)
+        processed_images = cv2.resize(rendering_images, self.img_size, interpolation=cv2.INTER_CUBIC)
         return processed_images
 
 class Normalize(object):
@@ -169,7 +169,7 @@ class CenterCrop(object):
                 processed_image = np.pad(img[y_top:y_bottom + 1, x_left:x_right + 1],
                                          ((pad_y_top, pad_y_bottom), (pad_x_left, pad_x_right), (0, 0)),
                                          mode='edge')
-                processed_image = cv2.resize(processed_image, (self.img_size_w, self.img_size_h))
+                processed_image = cv2.resize(processed_image, (self.img_size_w, self.img_size_h), interpolation=cv2.INTER_CUBIC)
             else:
                 if img_height > self.crop_size_h and img_width > self.crop_size_w:
                     x_left = int(img_width - self.crop_size_w) // 2
@@ -182,7 +182,7 @@ class CenterCrop(object):
                     y_top = 0
                     y_bottom = img_height
 
-                processed_image = cv2.resize(img[y_top:y_bottom, x_left:x_right], (self.img_size_w, self.img_size_h))
+                processed_image = cv2.resize(img[y_top:y_bottom, x_left:x_right], (self.img_size_w, self.img_size_h), interpolation=cv2.INTER_CUBIC)
 
             processed_images = np.append(processed_images, [processed_image], axis=0)
             # Debug
@@ -265,7 +265,7 @@ class RandomCrop(object):
                 processed_image = np.pad(img[y_top:y_bottom + 1, x_left:x_right + 1],
                                          ((pad_y_top, pad_y_bottom), (pad_x_left, pad_x_right), (0, 0)),
                                          mode='edge')
-                processed_image = cv2.resize(processed_image, (self.img_size_w, self.img_size_h))
+                processed_image = cv2.resize(processed_image, (self.img_size_w, self.img_size_h), interpolation=cv2.INTER_CUBIC)
             else:
                 if img_height > self.crop_size_h and img_width > self.crop_size_w:
                     x_left = int(img_width - self.crop_size_w) // 2
@@ -278,7 +278,7 @@ class RandomCrop(object):
                     y_top = 0
                     y_bottom = img_height
 
-                processed_image = cv2.resize(img[y_top:y_bottom, x_left:x_right], (self.img_size_w, self.img_size_h))
+                processed_image = cv2.resize(img[y_top:y_bottom, x_left:x_right], (self.img_size_w, self.img_size_h), interpolation=cv2.INTER_CUBIC)
 
             processed_images = np.append(processed_images, [processed_image], axis=0)
 
