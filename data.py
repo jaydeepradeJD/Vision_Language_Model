@@ -66,7 +66,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 
 	def __getitem__(self, idx):
 		if not (self.dataset_type == 'test'):
-
+			print(idx, self.dirs[idx])
 			filepath = os.path.join(str(self.dirs[idx]), str(self.representation_type))
 			#if self.representation_type == 'surface_with_inout_fixed_views':
 			if self.cfg.DATASET.FIXED_VIEWS:
@@ -129,7 +129,7 @@ class ProteinDataset(torch.utils.data.Dataset):
 			rendering_images = []
 			
 			# if filepath.split('/')[-1] = 'Extracted_SingleMolecule':
-			if idx < 25: #5 :
+			if idx < 10: #5 :
 				if self.background:
 					# filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule/'
 					# # filepath = '/scratch/bbmw/jd23697/WRAC/SingleMolecule_V2/'
@@ -140,11 +140,15 @@ class ProteinDataset(torch.utils.data.Dataset):
 					
 				else:
 					# filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule/'
-					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_V2/'
+					# filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_V2/'
+					filepath = '/scratch/bbmw/jd23697/WRAC/Extracted_SingleMolecule_All/'
+					
 					
 				image_names = os.listdir(filepath)
 				# image_names = ['1.jpg', '2.jpg', '4.jpg', '7.jpg', '20.jpg', '24.jpg', '26.jpg']
 				# image_names = ['1_1.jpg', '2_1.jpg', '4_1.jpg', '4_4.jpg', '5_1.jpg', '5_5.jpg', '5_9.jpg']
+				# image_names = ['1.jpg', '1_1.jpg', '3_1.jpg', '4.jpg', '4_1.jpg', '4_3.jpg', '4_4.jpg', '5_1.jpg',
+				#    				'5_5.jpg', '5_9.jpg', '7.jpg', '28.jpg', '29.jpg', '34.jpg', '40.jpg']
 				views = random.sample(range(len(image_names)), self.n_views_rendering)
 				for v in views:
 					filename = os.path.join(filepath, image_names[v])
