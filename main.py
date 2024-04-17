@@ -231,6 +231,8 @@ if __name__ == '__main__':
 						help='Latent space dimensions', default=4096, type=int)
 	parser.add_argument('--fixed_views', dest='fixed_views',
 						help='Use Fixed views', action='store_true')
+	parser.add_argument('-save_obj', '--save_obj', action='store_true',
+						help='Save OBJ files of predictions or not')
 	
 	
 	
@@ -314,7 +316,8 @@ if __name__ == '__main__':
 		cfg.TEST.IS_TEST = True
 		cfg.TEST.NUM_SAMPLES = args.num_test_samples
 		cfg.TEST.TEST_WRAC = args.test_wrac
-
+		if args.save_obj:
+			cfg.TEST.SAVE_OBJ = True
 	if args.disc:
 		cfg.NETWORK.DISCRIMINATOR = True
 	
@@ -334,5 +337,6 @@ if __name__ == '__main__':
 	if args.fixed_views:
 		cfg.DATASET.FIXED_VIEWS = True
 		cfg.CONST.N_VIEWS_RENDERING = 6
+	
 
 	main(cfg)
