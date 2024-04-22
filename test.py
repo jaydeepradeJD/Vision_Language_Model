@@ -50,8 +50,8 @@ def test(model, train_data_loader=None, val_data_loader=None, test_data_loader=N
 			# print(iou,'--'*5 , iou2)
 			predicted = predicted.cpu().detach().squeeze().numpy()
 			target = target.cpu().detach().squeeze().numpy()
-			
-			visMC(target, predicted, idx, path=save_dir+'/train')
+			if cfg.TEST.SAVE_OBJ:
+				visMC(target, predicted, idx, path=save_dir+'/train')
 		print('train_iou = ', np.mean(train_ious))
 
 	if val_data_loader is not None:	
@@ -76,8 +76,8 @@ def test(model, train_data_loader=None, val_data_loader=None, test_data_loader=N
 			# print(iou,'--'*5 , iou2)
 			predicted = predicted.cpu().detach().squeeze().numpy()
 			target = target.cpu().detach().squeeze().numpy()
-			
-			visMC(target, predicted, idx, path=save_dir+'/val')
+			if cfg.TEST.SAVE_OBJ:
+				visMC(target, predicted, idx, path=save_dir+'/val')
 
 		print('val_iou = ', np.mean(val_ious))
 
@@ -110,7 +110,8 @@ def test(model, train_data_loader=None, val_data_loader=None, test_data_loader=N
 			for i in range(imgs.shape[0]):
 				img = imgs[i].transpose(1,2,0)
 				cv2.imwrite(save_dir+'/test/imgs_'+str(idx)+'/'+str(i)+'.png', img*255)
-			visMC(target, predicted, idx, path=save_dir+'/test')
+			if cfg.TEST.SAVE_OBJ:
+				visMC(target, predicted, idx, path=save_dir+'/test')
 
 		print('mean test_iou = ', np.mean(test_ious))
 
@@ -125,12 +126,12 @@ def compute_iou(target, predicted, th=0.5):
 
 def compute_iou_v2(target, predicted, th=0.5):
 	# Modified to take a mean of IoUs over each sample IoU
-	th = 0.5
+	# th = 0.5
 	_volume = torch.ge(predicted, th).float()
 	intersection = torch.sum(_volume.mul(target), dim=(1,2,3)).float()
 	union = torch.sum(torch.ge(_volume.add(target), 1), dim=(1,2,3)).float()
 	iou = (intersection / union)
-	iou = torch.mean(iou).item()
+	iou = torch.mean(iou, dim=-1).item()
 	return iou
 
 if __name__ == '__main__':

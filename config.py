@@ -78,5 +78,5 @@ __C.TEST                                    = edict()
 __C.TEST.IS_TEST                            = False
 __C.TEST.NUM_SAMPLES                        = 1
 __C.TEST.TEST_WRAC                          = False
-
+__C.TEST.SAVE_OBJ                          = False
 
